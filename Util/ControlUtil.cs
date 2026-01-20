@@ -18,10 +18,49 @@ using FCT.Model;
 
 namespace FrmControl
 {
-    /// <summary>
-    /// Class ControlHelper.
-    /// </summary>
-    public static class ControlUtil
+	using System;
+	using System.Drawing;
+	using System.Linq;
+	using System.Windows.Forms;
+
+	public static class ControlExtensions
+	{
+		public static void ShowTempSelectForm(
+			this Control control,
+			string[] options,
+			Action<string> onSelected)
+		{
+			control.Click += (s, e) =>
+			{
+				if (options == null || options.Length == 0) return;
+
+				var screen = Screen.FromControl(control).WorkingArea;
+				var controlScreenPos = control.PointToScreen(Point.Empty);
+
+				int spaceAbove = controlScreenPos.Y - screen.Top;
+				int spaceBelow = screen.Bottom - (controlScreenPos.Y + control.Height);
+
+				bool showBelow = spaceBelow >= spaceAbove;
+
+				var tempForm = new TempSelectForm(options, onSelected);
+
+				tempForm.StartPosition = FormStartPosition.Manual;
+
+				int x = controlScreenPos.X;
+				int y = showBelow
+					? controlScreenPos.Y + control.Height
+					: controlScreenPos.Y - tempForm.Height;
+
+				tempForm.Location = new Point(x, y);
+				tempForm.Show(control.FindForm());
+			};
+		}
+	}
+
+	/// <summary>
+	/// Class ControlHelper.
+	/// </summary>
+	public static class ControlUtil
     {
         static object obj = new object();
         public static void LogAppend(this System.Windows.Forms.RichTextBox richTextBox1,Color color, string text) {
@@ -35,7 +74,7 @@ namespace FrmControl
 			    richTextBox1.SelectionColor = color;
 			    richTextBox1.AppendText(text);
 			    richTextBox1.AppendText("\n");
-			    richTextBox1.ScrollToCaret();
+			    //richTextBox1.ScrollToCaret();
 
             }
 		}

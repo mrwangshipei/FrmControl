@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace FrmControl.C.CMenu_.Node_
 {
+    [Serializable]
+    [TypeConverter(typeof(CTreeNodeConverter))]
     public class CTreeNodeTxt : ICTreeNode
     {
 
@@ -16,7 +19,6 @@ namespace FrmControl.C.CMenu_.Node_
             // 选择背景色与前景色
             Color backColor = Selected ? selectedNodeBackColor : nodeBackColor;
             Color foreColor = Selected ? selectedNodeForeColor : nodeForeColor;
-
             // 填充背景
             using (Brush backBrush = new SolidBrush(backColor))
             {

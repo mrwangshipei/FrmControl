@@ -24,12 +24,18 @@ namespace FrmBase_
 			fm.TopMost = true;
 			return fm.ShowDialog();
 		}
-		public FrmDialog()
-		{
-			InitializeComponent();
-		}
+        public FrmDialog()
+        {
+            InitializeComponent();
+        }
+        public FrmDialog(string msg,string title)
+        {
+            InitializeComponent();
+			Text = title;
+			label11.Text = msg;
+        }
 
-		private void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
 		{
 			this.DialogResult = DialogResult.OK;
 		}

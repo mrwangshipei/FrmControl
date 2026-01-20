@@ -28,12 +28,21 @@ namespace FrmControl.C.ProgressBar
         public Color progressColor2 { get;  set; } = Color.Gray;
         public float animationspeed = 3;
         public Timer tm = new Timer();
+        public bool useAnimation { get; set; }
         public TextProgressBar()
         {
             DoubleBuffered = true;
             Font = new Font("Arial", 48, FontStyle.Bold);
             Size = new Size(300, 100);
             tm.Tick += (e, arg) => {
+                if (!Visible)
+                {
+                    return;
+                }
+                if (!useAnimation)
+                {
+                    return;
+                }
                 waveOffset1 += Animationspeed * 2;
                 waveOffset += Animationspeed;
                 if (waveOffset < 0) {

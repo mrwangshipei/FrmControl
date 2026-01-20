@@ -2,6 +2,7 @@
 using FrmControl.C.Base;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Net;
@@ -11,8 +12,10 @@ using System.Windows.Forms;
 
 namespace FrmControl.C.Btn
 {
+	[DefaultEvent("Click")]
     public class FrmBtn : CBaseControl
 	{
+       
         // 默认背景颜色
         public Color defaultBackColor { 
 			get => defaultBackColor1; 
@@ -51,6 +54,15 @@ namespace FrmControl.C.Btn
 		public float ell;
 		private bool IsMouseDown;
         public bool Issquare { get; set; }
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                return cp;
+            }
+        }
         public float Radius { get { return ell; } set { ell = value;Invalidate(); } }
         public FrmBtn()
         {
@@ -59,6 +71,7 @@ namespace FrmControl.C.Btn
                           ControlStyles.OptimizedDoubleBuffer |
                           ControlStyles.UserPaint |
                           ControlStyles.SupportsTransparentBackColor, true);
+			this.DoubleBuffered = true;
         }
         private Rectangle Lastr;
         private Color defaultBackColor1 = Color.White;
@@ -71,15 +84,10 @@ namespace FrmControl.C.Btn
 		{
 			if (Radius != lastell || !Rectangle.Equals(this.ClientRectangle, Lastr))
 			{
-				if (Region != null)
-				{
-					Region.Dispose();
-				}
 				Lastr = this.ClientRectangle;
 				lastell = Radius;
                 this.Region = new Region(GraphicsExtensions.GetRoundedRectangle(this.ClientRectangle, Radius));
 			}
-           // base.OnPaint(e);
 
             var gp = e.Graphics;
 			using (var bs = new SolidBrush(BackColor))
@@ -89,14 +97,7 @@ namespace FrmControl.C.Btn
 			}
 			gp.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
 			gp.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-			if (BackImg != null)
-			{
-				int x = (int)((Height - Height * smallimg)/ 2);
-				int y = (int)((Width- Width* smallimg)/2);
-				int Wid = (int)(Width * smallimg);
-				int Hei= (int)(Height* smallimg);
-				gp.DrawImage(BackImg,x,y,Wid,Hei);
-			}
+			
 			var s  = gp.MeasureString(FrmText, Font);
 			float fontsta = Width * ImgPix;
 			float center = ((Width - fontsta) - s.Width)/2+fontsta;
@@ -113,7 +114,16 @@ namespace FrmControl.C.Btn
 			
 
 			}
-		}
+            base.OnPaint(e);
+            if (BackImg != null)
+            {
+                int x = (int)((Height - Height * smallimg) / 2);
+                int y = (int)((Width - Width * smallimg) / 2);
+                int Wid = (int)(Width * smallimg);
+                int Hei = (int)(Height * smallimg);
+                gp.DrawImage(BackImg, x, y, Wid, Hei);
+            }
+        }
         protected override void OnTextChanged(EventArgs e)
         {
             base.OnTextChanged(e);

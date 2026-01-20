@@ -72,6 +72,10 @@ namespace FrmControl.C.ComboBox_
         protected override void OnTextChanged(EventArgs e)
         {
             base.OnTextChanged(e);
+            if (placeholderTextBox.Text == Text)
+            {
+                return;
+            }
             placeholderTextBox.Text = Text;
             if (DataSource == null || DataSource.Count== 0)
             {
@@ -148,10 +152,10 @@ namespace FrmControl.C.ComboBox_
             //InitTempForm();
             tm = new CTreeMenu();
             if (dataSource == null) {
-                tm.Nodes = new BindingList<ICTreeNode>();
+                tm.Nodes = new CTreeNodeCollection();
                 return;
             }
-            tm.Nodes = new BindingList<ICTreeNode>(dataSource.Select(x => new CTreeNodeTxt() { Text = x } as ICTreeNode).ToList()); ;
+            tm.Nodes = new CTreeNodeCollection(dataSource.Select(x => new CTreeNodeTxt() { Text = x } as ICTreeNode).ToList()); ;
         }
 
         public int OutLength { 
@@ -173,11 +177,9 @@ namespace FrmControl.C.ComboBox_
                 return;
             } 
             lastr = this.Bounds;
-            this.Region?.Dispose();
             this.RegionPath = this.ClientRectangle.ToSlantedRegion(value);
-            this.Region = new Region(RegionPath);
             Ou.Padding = new Padding(outLength,1,1,1);
-            this.Invalidate();
+            this.Region = new Region(RegionPath);
          }
 
         
@@ -187,6 +189,10 @@ namespace FrmControl.C.ComboBox_
                 this.DoInvoke(new Action(() =>
                 {
                     selectBtnBackColor = value;
+                    if (SelectBtnBackColor.A == 0)
+                    {
+                        SelectBtnBackColor = Color.White;
+                    }
                     btnImg.BackColor = SelectBtnBackColor;
                 }));
                 } 
@@ -201,6 +207,10 @@ namespace FrmControl.C.ComboBox_
         }
         public CComboBox() {
             InitControl();
+            DoubleBuffered = true;
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                  ControlStyles.AllPaintingInWmPaint |
+                  ControlStyles.UserPaint, true);
             DataSource = new BindingList<string>();
         }
         protected override void OnPaint(PaintEventArgs e)
@@ -266,7 +276,9 @@ namespace FrmControl.C.ComboBox_
             tp.Width = Width;
             tp.Controls.Clear();
             f = new FlowLayoutPanel();
-            f.AutoScroll = true;
+            f.EnableDragScrollNet48();
+
+			f.AutoScroll = true;
             f.HorizontalScroll.Visible = false;
             f.Dock = DockStyle.Fill;
             tp.Controls.Add(f);
@@ -278,7 +290,7 @@ namespace FrmControl.C.ComboBox_
             tm.ItemHeight = itemSize;
             
             tm.LayoutType = CTreeMenu.Layout.V;
-            tm.Nodes = new BindingList<ICTreeNode>(dataSource.Select(x => new CTreeNodeTxt() { Text = x } as ICTreeNode).ToList()); ;
+            tm.Nodes = new CTreeNodeCollection(dataSource.Select(x => new CTreeNodeTxt() { Text = x } as ICTreeNode).ToList()); ;
             tm.SelectNode(SelectedIndex);
             tm.SelectedNodeChanged += OnMouseSelectedChanged;
             f.Controls.Add(tm);
@@ -292,7 +304,7 @@ namespace FrmControl.C.ComboBox_
                 Text = e.Text;
             }
             tp?.Close();
-            if (tm != null && tm.Nodes.IndexOf(e) > 0)
+            if (tm != null && tm.Nodes.IndexOf(e) >= 0)
             {
                 if (SelectedIndex != tm.Nodes.IndexOf(e))
                 {

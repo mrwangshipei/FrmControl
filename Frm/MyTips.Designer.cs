@@ -115,7 +115,7 @@ namespace FrmControl.Frm
 		private Panel panel1;
 		private ImageList imageList1;
 		private Panel panel4;
-		private Label label1;
 		private Panel panel3;
-	}
+        private Label label1;
+    }
 }

@@ -59,7 +59,7 @@ namespace FrmBase_
             // 
             // apple3Btn1
             // 
-            this.apple3Btn1.BtnPad = new System.Windows.Forms.Padding(10);
+            //this.apple3Btn1.BtnPad = new System.Windows.Forms.Padding(10);
             this.apple3Btn1.Padding = new System.Windows.Forms.Padding(0);
             this.apple3Btn1.Size = new System.Drawing.Size(156, 50);
             // 

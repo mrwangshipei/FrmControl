@@ -101,15 +101,19 @@ namespace UpperComAutoTest.MyControls.Frm
             // gradientProgressBar1
             // 
             this.gradientProgressBar1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gradientProgressBar1.EndColor = System.Drawing.Color.FromArgb(((int)(((byte)(24)))), ((int)(((byte)(144)))), ((int)(((byte)(255)))));
+            this.gradientProgressBar1.EndColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.gradientProgressBar1.Location = new System.Drawing.Point(0, 0);
             this.gradientProgressBar1.Maximum = 100;
             this.gradientProgressBar1.Minimum = 0;
             this.gradientProgressBar1.Name = "gradientProgressBar1";
+            this.gradientProgressBar1.Radius = 0;
+            this.gradientProgressBar1.RadiusAngle = new System.Windows.Forms.Padding(0);
             this.gradientProgressBar1.Size = new System.Drawing.Size(404, 24);
             this.gradientProgressBar1.StartColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.gradientProgressBar1.TabIndex = 0;
+            this.gradientProgressBar1.UseAnimation = true;
             this.gradientProgressBar1.Value = 0;
+            this.gradientProgressBar1.ValueColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             // 
             // Loading
             // 

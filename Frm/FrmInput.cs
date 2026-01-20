@@ -14,12 +14,13 @@ namespace COMIEEE
 {
     public partial class FrmInput : FrmBase
     {
-		public static string ShowDialog(Form parent,string title, string defaultv ="") {
+		public static string ShowDialog(Form parent,string title, string defaultv ="",Action<FrmInput> Do = null) {
 			FrmInput fm = new FrmInput();
 			fm.label4.Text = title;
 			fm.textBox1.Text = defaultv;
 
 			fm.Owner = parent;
+			Do?.Invoke(fm);
 			//fm.textBox1.Text = defaulttext;
 			var r = fm.ShowDialog(parent);
 			
@@ -64,8 +65,33 @@ namespace COMIEEE
 			this.Close();
 
 		}
+		public static string ShowDialog(
+			string title,
+			string defaultValue = "",
+			Action<FrmInput> setup = null)
+		{
+			using (FrmInput fm = new FrmInput())
+			{
+				// 基本初始化
+				fm.label4.Text = title;
+				fm.textBox1.Text = defaultValue;
 
-        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+				// 允许外部设置属性（大小、位置、校验、样式等）
+				setup?.Invoke(fm);
+
+				// ⚠️ 不指定 Owner，确保在主窗体创建前可用
+				DialogResult result = fm.ShowDialog();
+
+				if (result != DialogResult.OK)
+				{
+					return null;
+				}
+
+				return fm.textBox1.Text;
+			}
+		}
+
+		private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
 			if (e.KeyCode == Keys.Enter)
 			{

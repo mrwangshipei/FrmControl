@@ -38,7 +38,7 @@
   <PropertyGroup>
     <StartupObject />
     <PackageOutputPath>C:\Program Files (x86)\Microsoft SDKs\NuGetPackages</PackageOutputPath>
-    <Version>1.0.1.8</Version>
+    <Version>1.0.1.71</Version>
 
   </PropertyGroup>
   <ItemGroup>
@@ -66,6 +66,7 @@
     <Compile Include="Animation\AnimationBase.cs" />
     <Compile Include="Animation\ClickAnimation.cs" />
     <Compile Include="CAttribute\CornerRadiusAttribute.cs" />
+    <Compile Include="Converter\CTreeNodeConverter.cs" />
     <Compile Include="C\Base\CBasePanel.cs" />
     <Compile Include="C\CBtn_\Apple3Btn.cs">
       <SubType>UserControl</SubType>
@@ -73,6 +74,7 @@
     <Compile Include="C\CBtn_\Apple3Btn.Designer.cs">
       <DependentUpon>Apple3Btn.cs</DependentUpon>
     </Compile>
+    <Compile Include="C\CBtn_\IndustrialTierButton.cs" />
     <Compile Include="C\CBtn_\FrmBtn.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -82,16 +84,22 @@
     <Compile Include="C\CBtn_\FrmLinerGidentBtn.Designer.cs">
       <DependentUpon>FrmLinerGidentBtn.cs</DependentUpon>
     </Compile>
+    <Compile Include="C\CBtn_\FrmTips.cs" />
+    <Compile Include="C\CBtn_\FrmTips.Designer.cs" />
     <Compile Include="C\CBtn_\SliderCtl.cs" />
     <Compile Include="C\Base\CBaseControl.cs" />
     <Compile Include="C\CCheckBox_\CCheckBoxBtn.cs" />
     <Compile Include="C\CCheckBox_\CCheckBoxBtn.Designer.cs" />
+    <Compile Include="C\CMenu_\Collection\Class1.cs" />
     <Compile Include="C\CMenu_\CTreeMenu.cs" />
     <Compile Include="C\CMenu_\Node_\CTreeNodeTxt.cs" />
     <Compile Include="C\CMenu_\Node_\ICTreeNode.cs" />
     <Compile Include="C\CMenu_\Paint_\IPaint.cs" />
     <Compile Include="C\ComboBox_\CComboBox.cs" />
     <Compile Include="C\CPanel_\CPanel.cs" />
+    <Compile Include="C\CPanel_\CTableLayoutPanel.cs" />
+    <Compile Include="C\ProgressBar\YieldProgressBar.cs" />
+    <Compile Include="C\ProgressBar\VerticalProgressBar.cs" />
     <Compile Include="C\Special\LastResultControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -149,6 +157,7 @@
     <Compile Include="FrmPremission\FrmUserGroupEdit.Designer.cs">
       <DependentUpon>FrmUserGroupEdit.cs</DependentUpon>
     </Compile>
+    <Compile Include="Frm\TempSelectForm.cs" />
     <Compile Include="Frm\FrmDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -188,6 +197,7 @@
     <Compile Include="Model\CountModel - 复制.cs" />
     <Compile Include="Model\CountModel.cs" />
     <Compile Include="Model\PNCountModel.cs" />
+    <Compile Include="moudle\UpperInitAnimationMoudle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -206,6 +216,7 @@
     <Compile Include="FrmPremission\C\UserEditControl.Designer.cs">
       <DependentUpon>UserEditControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Util\Class1.cs" />
     <Compile Include="Util\ControlUtil.cs" />
     <Compile Include="Util\FontLoader.cs" />
     <Compile Include="Util\WindowUtil.cs" />
@@ -218,6 +229,7 @@
     <EmbeddedResource Include="C\CBtn_\FrmLinerGidentBtn.resx">
       <DependentUpon>FrmLinerGidentBtn.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="C\CBtn_\FrmTips.resx" />
     <EmbeddedResource Include="C\CCheckBox_\CCheckBoxBtn.resx" />
     <EmbeddedResource Include="C\Special\LastResultControl.resx">
       <DependentUpon>LastResultControl.cs</DependentUpon>
@@ -299,14 +311,10 @@
     <None Include="Resources\Shut down-2.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="IOCG" Version="1.0.0.7" />
     <PackageReference Include="System.ValueTuple">
       <Version>4.5.0</Version>
     </PackageReference>
-    <PackageReference Include="UPPERIOC" Version="2.0.4.33" />
+    <PackageReference Include="UPPERIOC" Version="2.0.4.70" />
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-	  <Exec Command="start /B nuget push &quot;$(PackageOutputPath)\$(PackageId).$(Version).nupkg&quot;  -Source &quot;http://8.138.99.154:5000/v3/index.json&quot; -ApiKey &quot;wspwasnl001112&quot;&#xD;&#xA;&#xD;&#xA;" />
-  </Target>
 
 </Project>

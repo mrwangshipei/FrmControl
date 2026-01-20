@@ -11,7 +11,8 @@ using FrmControl.C.Base;
 
 namespace FrmControl.C.Btn
 {
-    public partial class FrmBtnImg : CBaseControl
+	[DefaultEvent("Click")]
+	public partial class FrmBtnImg : CBaseControl
     {
         public Image Icon { get => IconPanel.BackgroundImage; set => IconPanel.BackgroundImage = value; }
         public ImageLayout IconLayout{ get=>IconPanel.BackgroundImageLayout; set => IconPanel.BackgroundImageLayout = value; }

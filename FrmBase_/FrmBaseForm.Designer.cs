@@ -87,7 +87,6 @@
             // apple3Btn1
             // 
             this.apple3Btn1.BackColor = System.Drawing.Color.Transparent;
-            this.apple3Btn1.BtnPad = new System.Windows.Forms.Padding(5);
             this.apple3Btn1.Dock = System.Windows.Forms.DockStyle.Left;
             this.apple3Btn1.Location = new System.Drawing.Point(0, 0);
             this.apple3Btn1.Margin = new System.Windows.Forms.Padding(0);

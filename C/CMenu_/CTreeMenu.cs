@@ -13,10 +13,12 @@ namespace FrmControl.C.CMenu_
     {
         public event EventHandler<ICTreeNode> SelectedNodeChanged;
         private Padding radius;
-        volatile private BindingList<ICTreeNode> nodes;
-        private Color nodeBackColor = Color.White;
+        volatile private CTreeNodeCollection nodes = new CTreeNodeCollection();
+        private Color nodeBackColor = Color.LightGray;
         private Color nodeForeColor = Color.Black;
         private Color selectedNodeBackColor = Color.DimGray;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [Browsable(true)]
         public ICTreeNode SelectedNode { get => selectedNode;
             set
             {
@@ -29,19 +31,27 @@ namespace FrmControl.C.CMenu_
                 this.OnSelectNodeChanged(this, value);
             } }
 
-        private void OnSelectNodeChanged(CTreeMenu cTreeMenu, ICTreeNode value)
-        {
-            SelectedNodeChanged?.Invoke(this, value);
-        }
+      
 
         private Color selectedNodeForeColor = Color.White;
         private int itemHeight = 60;
         private ICTreeNode selectedNode;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [Browsable(true)]
         public Color NodeBackColor { get => nodeBackColor; set { nodeBackColor = value; this.Invalidate(); } }
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [Browsable(true)]
         public Color NodeForeColor { get => nodeForeColor; set { nodeForeColor = value; this.Invalidate(); } }
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [Browsable(true)] 
         public Color SelectedNodeBackColor { get => selectedNodeBackColor; set { selectedNodeBackColor = value; this.Invalidate(); } }
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [Browsable(true)] 
         public Color SelectedNodeForeColor { get => selectedNodeForeColor; set { selectedNodeForeColor = value; this.Invalidate(); } }
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [Browsable(true)]
+        
         public int ItemHeight
         {
             get => itemHeight;
@@ -55,12 +65,15 @@ namespace FrmControl.C.CMenu_
             }
         }
 
-
         public enum Layout {
             V, H
         }
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [Browsable(true)]
         public Layout LayoutType { get; set; }
-        public BindingList<ICTreeNode> Nodes { get => nodes;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [Browsable(true)]
+        public CTreeNodeCollection Nodes { get => nodes;
             set
             {
                 this.DoInvoke(new Action(() =>
@@ -89,15 +102,22 @@ namespace FrmControl.C.CMenu_
                 }));
             }
         }
-
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [Browsable(true)]
         public Point ClickAt { get; private set; }
 
         public CTreeMenu() {
+            BackColor = Color.Gray;
+            Radius = new Padding(5);
         }
-
-        protected override void OnMouseDown(MouseEventArgs e)
+       
+        private void OnSelectNodeChanged(CTreeMenu cTreeMenu, ICTreeNode value)
         {
-            base.OnMouseDown(e);
+            SelectedNodeChanged?.Invoke(this, value);
+        }
+        protected override void OnMouseClick(MouseEventArgs e)
+        {
+            base.OnMouseClick(e);
             ClickAt = e.Location;
             this.Invalidate();
         }

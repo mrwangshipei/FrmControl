@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace FrmControl.C.Base
 {
-    public class CBaseControl : Control
+    public class CBaseControl : UserControl
     {
         private int radius = 0;
         private Rectangle retlast;
@@ -19,7 +19,11 @@ namespace FrmControl.C.Base
         [Category("外观")]
         [Description("设置圆角半径（分别代表左上、右上、右下、左下），0 表示无圆角")]
         [CornerRadius("每个值对应一个角的圆角大小，单位为像素")]
-        public Padding RadiusAngle { get => radiusAngle; set{ radiusAngle = value; 
+        public Padding RadiusAngle { 
+            get => radiusAngle; 
+            set
+            {
+                radiusAngle = value; 
                 ResetRegion();
 
             }
@@ -45,23 +49,26 @@ namespace FrmControl.C.Base
         private void ResetRegion()
         {
 
-            if (Radius == 0) {
-                return;
+            if (Radius == 0)
+            {
+                if (RadiusAngle == new Padding())
+                {
+                    return;
+                }
             }
-            if (Retlast != this.Bounds) {
+            if (!Rectangle.Equals(Retlast  ,this.Bounds)) {
                 if (this.Bounds.Height < 2|| this.Bounds.Width < 2)
                 {
                     return;
                 }
-                this.Region?.Dispose();
+                var x = this.Region;
                 Retlast = this.Bounds;
-                if (RadiusAngle == new Padding()) { 
+                if (RadiusAngle == new Padding()) {
                     this.Region = new Region(this.ClientRectangle.CreateRoundedRectanglePath(Radius));
                 }
                 else
                 {
                     this.Region = new Region(this.ClientRectangle.CreateRoundedRectanglePath( RadiusAngle));
-
                 }
             }
         }

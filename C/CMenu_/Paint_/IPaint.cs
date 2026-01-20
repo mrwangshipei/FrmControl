@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace FrmControl.C.CMenu_.Paint_
 {
+
     public interface IPaint
     {
 

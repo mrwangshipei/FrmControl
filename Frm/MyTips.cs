@@ -32,55 +32,56 @@ namespace FrmControl.Frm
             } }
 
         public static List<MyTips> useing_Tips = new List<MyTips>();
-		public static void ShowTips(Form BaseForm, Tipstype Type, string msg, int waittime = 2000, bool inWindow = true)
+		public static MyTips ShowTips(Form BaseForm, Tipstype Type, string msg, int waittime = 2000, bool inWindow = true)
 		{
+            MyTips m = null;
             if (BaseForm != null && BaseForm.InvokeRequired)
 			{
 				BaseForm.Invoke(new Action(() => {
-					ShowTip(BaseForm, Type, msg, waittime , inWindow);
+					m = ShowTip(BaseForm, Type, msg, waittime , inWindow);
 				}));
 			}
 			else
 			{
-				ShowTip(BaseForm, Type, msg, waittime, inWindow);
-
+				m = ShowTip(BaseForm, Type, msg, waittime, inWindow);
 			}
+            return m;
 		}
-		public static void ShowTips(Tipstype Type, string msg, int waittime = 2000)
+		public static MyTips ShowTips(Tipstype Type, string msg, int waittime = 2000)
 		{
-			ShowTips(null, Type, msg, waittime, false);
+			return ShowTips(null, Type, msg, waittime, false);
 
         }
         /// <summary>
         /// 显示成功提示（独立窗口，无父窗体关联）
         /// </summary>
-        public static void ShowTipSuccess(string message, int waitTime = 2000)
+        public static MyTips ShowTipSuccess(string message, int waitTime = 2000)
         {
-            ShowTip(null, Tipstype.Success, message, waitTime, inWindow: false);
+            return ShowTip(null, Tipstype.Success, message, waitTime, inWindow: false);
         }
 
         /// <summary>
         /// 显示信息提示（独立窗口，无父窗体关联）
         /// </summary>
-        public static void ShowTipTip(string message, int waitTime = 2000)
+        public static MyTips ShowTipTip(string message, int waitTime = 2000)
         {
-            ShowTip(null, Tipstype.Tip, message, waitTime, inWindow: false);
+            return ShowTip(null, Tipstype.Tip, message, waitTime, inWindow: false);
         }
 
         /// <summary>
         /// 显示警告提示（独立窗口，无父窗体关联）
         /// </summary>
-        public static void ShowTipWarn(string message, int waitTime = 2000)
+        public static MyTips ShowTipWarn(string message, int waitTime = 2000)
         {
-            ShowTip(null, Tipstype.Warn, message, waitTime, inWindow: false);
+            return ShowTip(null, Tipstype.Warn, message, waitTime, inWindow: false);
         }
 
         /// <summary>
         /// 显示错误提示（独立窗口，无父窗体关联）
         /// </summary>
-        public static void ShowTipError(string message, int waitTime = 2000)
+        public static MyTips ShowTipError(string message, int waitTime = 2000)
         {
-            ShowTip(null, Tipstype.Error, message, waitTime, inWindow: false);
+            return ShowTip(null, Tipstype.Error, message, waitTime, inWindow: false);
         }
         // 扩展调用方法 
         /// <summary>
@@ -90,52 +91,59 @@ namespace FrmControl.Frm
         /// <param name="message">提示信息内容</param>
         /// <param name="waitTime">提示持续时长(ms)，默认2000ms</param>
         /// <param name="inWindow">是否在窗体内部显示，默认true</param>
-        public static void ShowTipSuccess(Form baseForm, string message, int waitTime = 2000, bool inWindow = true)
+        public static MyTips ShowTipSuccess(Form baseForm, string message, int waitTime = 2000, bool inWindow = true)
         {
-            ShowTip(baseForm, Tipstype.Success, message, waitTime, inWindow);
+            return ShowTip(baseForm, Tipstype.Success, message, waitTime, inWindow);
         }
 
         /// <summary>
         /// 显示信息类提示 
         /// </summary>
-        public static void ShowTipTip(Form baseForm, string message, int waitTime = 2000, bool inWindow = true)
+        public static MyTips ShowTipTip(Form baseForm, string message, int waitTime = 2000, bool inWindow = true)
         {
-            ShowTip(baseForm, Tipstype.Tip, message, waitTime, inWindow);
+            return ShowTip(baseForm, Tipstype.Tip, message, waitTime, inWindow);
         }
 
         /// <summary>
         /// 显示警告类提示 
         /// </summary>
-        public static void ShowTipWarn(Form baseForm, string message, int waitTime = 2000, bool inWindow = true)
+        public static MyTips ShowTipWarn(Form baseForm, string message, int waitTime = 2000, bool inWindow = true)
         {
-            ShowTip(baseForm, Tipstype.Warn, message, waitTime, inWindow);
+            return ShowTip(baseForm, Tipstype.Warn, message, waitTime, inWindow);
         }
 
         /// <summary>
         /// 显示错误类提示 
         /// </summary>
-        public static void ShowTipError(Form baseForm, string message, int waitTime = 2000, bool inWindow = true)
+        public static MyTips ShowTipError(Form baseForm, string message, int waitTime = 2000, bool inWindow = true)
         {
-            ShowTip(baseForm, Tipstype.Error, message, waitTime, inWindow);
+            return ShowTip(baseForm, Tipstype.Error, message, waitTime, inWindow);
         }
-        private static void ShowTip(Form BaseForm,Tipstype Type, string msg,int waittime = 2000,bool inWindow = true) 
+        private static MyTips ShowTip(Form BaseForm,Tipstype Type, string msg,int waittime = 2000,bool inWindow = true) 
 		{
-		
+            MyTips tip = null;
             if (BaseForm != null && BaseForm.InvokeRequired)
             {
-                BaseForm.Invoke(ShowTip, BaseForm, Type, msg, waittime, inWindow);
-                return;
+                BaseForm.Invoke(() =>
+                {
+                   tip =  ShowTip(BaseForm, Type, msg, waittime, inWindow);
+                });
+                return tip;
             }
             else if (BaseForm == null)
             {
                 if (Application.OpenForms.Count > 0 && Application.OpenForms[0].InvokeRequired)
                 {
-                    Application.OpenForms[0].Invoke(ShowTip, Application.OpenForms[0], Type, msg, waittime, inWindow);
-                    return;
+                    Application.OpenForms[0].Invoke(() =>
+                    {
+                        tip = ShowTip(Application.OpenForms[0], Type, msg, waittime, inWindow);
+                    });
+                    //Application.OpenForms[0].Invoke(ShowTip, Application.OpenForms[0], Type, msg, waittime, inWindow);
+                    return tip;
                 }
                 else
                 {
-                    return;
+                    return tip;
                 }
             }
             MyTips myTips = null;
@@ -186,25 +194,28 @@ namespace FrmControl.Frm
             tips.ImageIndex = (int)Type;
 			    tips.label1.Text = msg;
 				tips.TopMost = true;
+            if (waittime > 0) { 
                 lock (useing_Tips)
                 { 
                     useing_Tips.Add(tips);
                 }
-				tips.StartPosition = FormStartPosition.Manual;
-				if (inWindow)
-				{
-					tips.Location = new Point(BaseForm.Location.X+ (BaseForm.Width /2 - tips.Width /2), BaseForm.Location.Y + (BaseForm.Height - tips.Height - (int)(BaseForm.Height *0.25) ));
-				}
-				else
-				{
-					tips.Location = new Point(Screen.PrimaryScreen.Bounds.Location.X + (Screen.PrimaryScreen.Bounds.Width / 2 - tips.Width / 2), Screen.PrimaryScreen.Bounds.Location.Y + (Screen.PrimaryScreen.Bounds.Height - tips.Height - 220));
+            }
+			tips.StartPosition = FormStartPosition.Manual;
+			if (inWindow)
+			{
+				tips.Location = new Point(BaseForm.Location.X+ (BaseForm.Width /2 - tips.Width /2), BaseForm.Location.Y + (BaseForm.Height - tips.Height - (int)(BaseForm.Height *0.25) ));
+			}
+			else
+			{
+				tips.Location = new Point(Screen.PrimaryScreen.Bounds.Location.X + (Screen.PrimaryScreen.Bounds.Width / 2 - tips.Width / 2), Screen.PrimaryScreen.Bounds.Location.Y + (Screen.PrimaryScreen.Bounds.Height - tips.Height - 220));
 
-				}
-				int n = tips.GetTextLineCount(tips.label1);
-				tips.Height = tips.Height * n;
-				tips.ShowForm(waittime);
+			}
+			int n = tips.GetTextLineCount(tips.label1);
+			tips.Height = tips.Height * n;
+			tips.ShowForm(waittime);
+            return tips;
 
-		}
+        }
    
         public int GetTextLineCount(System.Windows.Forms.Label label1)
 	{
@@ -289,16 +300,28 @@ namespace FrmControl.Frm
                 }
 
                 oldRegion?.Dispose();
+                if (waittime > 0)
+					Task.Delay(waittime).ContinueWith(_ =>
+					{
+						try
+						{
+							if (this.IsHandleCreated)
+							{
+								this.BeginInvoke(new Action(() =>
+								{
+									if (!this.IsDisposed)
+										this.Close();
+								}));
+							}
+						}
+						catch (ObjectDisposedException)
+						{
+							// 窗体已经释放，忽略即可
+						}
+					});
 
-                Task.Delay(waittime).ContinueWith(_ =>
-                {
-                    if (!this.IsDisposed && !this.Disposing)
-                    {
-                        this.Invoke(new Action(() => Close()));
-                    }
-                });
-            }
-            catch (Exception ex)
+			}
+			catch (Exception ex)
             {
                 Console.WriteLine("ShowForm异常：" + ex.Message);
             }

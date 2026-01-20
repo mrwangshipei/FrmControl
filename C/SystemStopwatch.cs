@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using UPPERIOC2.UPPER.EmailErrorSender.Sender;
 using UPPERIOC2.UPPER.Util;
 
 namespace FrmControl.C
@@ -65,11 +64,11 @@ namespace FrmControl.C
 			{
 				var re = PrintStackTrace(Process.GetCurrentProcess().Id);
 				re = "应用不正常响应,堆栈信息在" + re;
-				if (EmailSender.instance == null)
+				//if (EmailSender.instance == null)
 				{
-					Show("错误邮件未配置。堆栈死机。"+re,"提示");
+				//	Show("错误邮件未配置。堆栈死机。"+re,"提示");
 				}
-				EmailSender.instance?.SendEmail(re);
+				//EmailSender.instance?.SendEmail(re);
 			}
 			else
 			{

@@ -30,7 +30,27 @@ namespace FrmControl.C.Btn
         {
 
             private bool _isRunning = false;
-            public static AnimationUtil Instance { get; private set; } = new AnimationUtil();
+            private static AnimationUtil _instance;
+            private static readonly object _lock = new object();
+
+          
+            public static AnimationUtil Instance
+            {
+                get
+                {
+                    if (_instance == null)
+                    {
+                        lock (_lock)
+                        {
+                            if (_instance == null)
+                            {
+                                _instance = new AnimationUtil();
+                            }
+                        }
+                    }
+                    return _instance;
+                }
+            }
             public ConcurrentQueue<KeyValuePair<int, Action<int>>> Data = new ConcurrentQueue<KeyValuePair<int, Action<int>>>();
             public AnimationUtil()
             {
@@ -59,7 +79,7 @@ namespace FrmControl.C.Btn
                         }
                         Data.RemoveAll(item => DelTemp.Contains(item));
                         DelTemp.Clear();
-                        Thread.Sleep(20);
+                        Thread.Sleep(60);
                     }
                 });
             }
@@ -88,6 +108,7 @@ namespace FrmControl.C.Btn
     public partial class FrmLinerGidentBtn : CBaseControl
     {
         public int SizeCLick { get; set; } = 70;
+        public bool UseAnimation { get; set; }
         [Description("0~1的向量")]
         public PointF Direction { get; set; } = new PointF(0,1);
         public Color Color1 { get; set; } = Color.LightGray;
@@ -102,6 +123,9 @@ namespace FrmControl.C.Btn
         {
             SetStyle( ControlStyles.SupportsTransparentBackColor,true);
             this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                  ControlStyles.AllPaintingInWmPaint |
+                  ControlStyles.UserPaint, true);
             InitializeComponent();
         }
         protected override void OnMouseEnter(EventArgs e)
@@ -109,17 +133,21 @@ namespace FrmControl.C.Btn
         {
              Mousein.Y = 1;
              MousePosition = Control.MousePosition;
-            AnimationUtil.Instance.SetAnimation(100, x => {
-                if (x % 20 == 0)
-                {
-                    DoInvoke(() =>{
-                    Mousein.X = (100-x)*1.0f / 100;
+            if (UseAnimation)
+            {
 
-                    this.Refresh();
-                    });
+                AnimationUtil.Instance.SetAnimation(100, x => {
+                    if (x % 20 == 0)
+                    {
+                        DoInvoke(() =>{
+                        Mousein.X = (100-x)*1.0f / 100;
 
-                }
-            });
+                        this.Refresh();
+                        });
+
+                    }
+                });
+            }
             
             base.OnMouseEnter(e);
 
@@ -135,17 +163,21 @@ namespace FrmControl.C.Btn
       
             Mousedown.Y = 1;
             MousePosition =(e.Location);
-            AnimationUtil.Instance.SetAnimation(100, x => {
-                Mousedown.X = (100-x) * 1.0f / 100;
-                if (x % 10 == 0)
-                {
-                    DoInvoke(() => {
+            if (UseAnimation)
+            {
+                AnimationUtil.Instance.SetAnimation(100, x => {
+                    Mousedown.X = (100-x) * 1.0f / 100;
+                    if (x % 10 == 0)
+                    {
+                        DoInvoke(() => {
 
-                        this.Refresh();
-                    });
+                            this.Refresh();
+                        });
 
-                }
-            });
+                    }
+                });
+
+            }
             //this.Invalidate();
 
             base.OnMouseDown(e);

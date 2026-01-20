@@ -124,7 +124,13 @@ namespace UpperComAutoTest.MyControls.Frm
 				catch (Exception ex)
 				{
 					DoInvoke(()=>FrmDialog.ShowDialog(this,ex.Message+ex.StackTrace,"异常"));
-					
+                    if (Visible)
+                    {
+                        this.Invoke(new Action(() => {
+                            Close();
+                        }));
+                    }
+                    throw;
 				}
 
 				if (Visible)

@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using FCT.Model;
 using FrmControl.C.Base;
-using UPPERIOC2.UPPER.MVVM.Extension;
 using Timer = System.Windows.Forms.Timer;
 
 namespace FrmControl.C.CPanel_
@@ -82,7 +81,7 @@ namespace FrmControl.C.CPanel_
                 ControlStyles.OptimizedDoubleBuffer|
                 ControlStyles.SupportsTransparentBackColor,
                 true);
-
+            DoubleBuffered = true;
          
         }
 

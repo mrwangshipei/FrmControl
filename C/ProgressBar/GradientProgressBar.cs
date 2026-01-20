@@ -14,12 +14,26 @@ namespace UpperComAutoTest.MyControls
 		private Color endColor = Color.FromArgb(24, 144, 255);
 		private System.Windows.Forms.Timer animationTimer;
 		private float animationValue;
-        private bool useAnimation = true;
+        private bool useAnimation = false;
+		private Color valueColor;
+		private float borderStonger = 1f;
 
-        public bool UseAnimation { get => useAnimation; set => useAnimation = value; }
+		public bool UseAnimation { get => useAnimation; set => useAnimation = value; }
         public Color StartColor { get=> startColor; set=> startColor = value; }
-        public Color ValueColor { get=> startColor; set { startColor = value;
-				endColor = value;
+        public Color? ValueColor { get=> valueColor; set {
+				if (value == null)
+				{
+					return;
+				}
+				if (value == Color.Empty)
+				{
+					return;
+
+				}
+				var co = value.Value;
+				valueColor = co;
+				startColor = co;
+				endColor = co;
 				Invalidate();
 			}}
         public Color EndColor { get=> endColor; set=> endColor = value; }
@@ -76,6 +90,8 @@ namespace UpperComAutoTest.MyControls
 			}
 		}
 
+		public float BorderStonger { get => borderStonger; set => borderStonger = value; }
+
 		private void OnAnimationTick(object sender, EventArgs e)
 		{
 			if (UseAnimation)
@@ -110,27 +126,32 @@ namespace UpperComAutoTest.MyControls
 			Color currentColor = InterpolateColor(startColor, endColor, animationValue / (maximum - minimum));
 
 			// 绘制背景
-			e.Graphics.Clear(Color.WhiteSmoke);
+			//e.Graphics.Clear(Color.WhiteSmoke);
+            using var so = new SolidBrush(BackColor);
+			e.Graphics.FillRectangle(so, ClientRectangle);
 
-			// 计算进度条的尺寸和位置
-			int width = (int)((float)(animationValue - minimum) / (maximum - minimum) * ClientRectangle.Width);
+            // 计算进度条的尺寸和位置
+            int width = (int)((float)(animationValue - minimum) / (maximum - minimum) * ClientRectangle.Width);
+			// 绘制渐变进度条
 			if (width > 0)
 			{
 				Rectangle progressRect = new Rectangle(ClientRectangle.X, ClientRectangle.Y, width, ClientRectangle.Height);
-
-				// 绘制渐变进度条
 				using (LinearGradientBrush brush = new LinearGradientBrush(progressRect, startColor, currentColor, LinearGradientMode.Horizontal))
 				{
 					e.Graphics.FillRectangle(brush, progressRect);
 				}
-			e.Graphics.DrawString((value * 100 )/(maximum - minimum) + "%", Font, new SolidBrush(Color.Black), this.ClientRectangle, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+			}
+			if (width >= 0)
+			{
+
+				e.Graphics.DrawString((value * 100 )/(maximum - minimum) + "%", Font, new SolidBrush(Color.Black), this.ClientRectangle, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
 
 			}
 
 			// 绘制边框
-			using (Pen pen = new Pen(Color.Black, 2)) // 边框颜色和宽度
+			using (Pen pen = new Pen(Color.Black, BorderStonger)) // 边框颜色和宽度
 			{
-				e.Graphics.DrawRectangle(pen, ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width - 1, ClientRectangle.Height - 1);
+				e.Graphics.DrawRectangle(pen, ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width - BorderStonger, ClientRectangle.Height - BorderStonger);
 			}
 		}
 
