@@ -52,15 +52,79 @@ namespace FrmControl.C.ComboBox_
 
             }
         }
+		private void OnMouseSelectedChanged(object sender, ICTreeNode e)
+		{
+			//    placeholderTextBox.Text = e.Text;
+			if (e == null)
+			{
+				return;
+			}
+			//if (e.Selected )
+			{
 
-        private void OnSelectIndexChanged(CComboBox cComboBox, int value)
+			}
+			tp?.Close();
+			if (Text != e.Text)
+			{
+                placeholderTextBox.Text = e.Text;
+			}
+			if (tm != null && tm.Nodes.IndexOf(e) >= 0)
+			{
+				if (SelectedIndex != tm.Nodes.IndexOf(e))
+				{
+					SelectedIndex = tm.Nodes.IndexOf(e);
+				}
+			}
+			//   SelectValueChanged?.Invoke(this,e.Text);
+		}
+		protected override void OnTextChanged(EventArgs e)
+		{
+			base.OnTextChanged(e);
+			if (placeholderTextBox.Text == Text)
+			{
+				return;
+			}
+			if (tm != null && tm.Nodes.Count(x => x.Text == Text) >= 0)
+			{
+				if (tm.Nodes.Count(x => x.Text == Text && tm.Nodes.IndexOf(x) == SelectedIndex) > 0)
+				{
+					return;
+					//	SelectedIndex = tm.Nodes.IndexOf(e);
+				}
+			}
+			placeholderTextBox.Text = Text;
+			if (DataSource == null || DataSource.Count == 0)
+			{
+				return;
+			}
+			if (DataSource.Contains(Text))
+			{
+				ICTreeNode x;
+				if (tm != null)
+				{
+					x = tm.SelectNode(Text);
+				}
+				else
+				{
+					x = new CTreeNodeTxt()
+					{
+						Text = Text,
+						Selected = true
+					};
+
+				}
+			}
+		}
+		private void OnSelectIndexChanged(CComboBox cComboBox, int value)
         {
-            SelectedIndexChanged?.Invoke(this,value);
             if (dataSource == null || dataSource.Count == 0)
             {
                 return;
             }
-            Text = dataSource[SelectedIndex];
+            placeholderTextBox.Text = dataSource[SelectedIndex];
+            Text = placeholderTextBox.Text;
+
+			SelectedIndexChanged?.Invoke(this,value);
         }
 
         private void OnMaxHeightChanged(int value)
@@ -69,36 +133,7 @@ namespace FrmControl.C.ComboBox_
             MaxHeightChanged?.Invoke(this, value);
 
         }
-        protected override void OnTextChanged(EventArgs e)
-        {
-            base.OnTextChanged(e);
-            if (placeholderTextBox.Text == Text)
-            {
-                return;
-            }
-            placeholderTextBox.Text = Text;
-            if (DataSource == null || DataSource.Count== 0)
-            {
-                return;
-            }
-            if (DataSource.Contains(Text))
-            {
-                ICTreeNode x;
-                if (tm != null)
-                {
-                    x = tm.SelectNode(Text);
-                }
-                else
-                {
-                    x = new CTreeNodeTxt()
-                    {
-                        Text = Text,
-                        Selected = true
-                    };
-                    
-                }
-            }
-        }
+	
         public int ItemSize { get => itemSize; set {
                 this.DoInvoke(new Action(() =>
                 {
@@ -296,23 +331,7 @@ namespace FrmControl.C.ComboBox_
             f.Controls.Add(tm);
         }
         public event EventHandler<string> SelectValueChanged;
-        private void OnMouseSelectedChanged(object sender, ICTreeNode e)
-        {
-        //    placeholderTextBox.Text = e.Text;
-            if (Text != e.Text)
-            {
-                Text = e.Text;
-            }
-            tp?.Close();
-            if (tm != null && tm.Nodes.IndexOf(e) >= 0)
-            {
-                if (SelectedIndex != tm.Nodes.IndexOf(e))
-                {
-                    SelectedIndex = tm.Nodes.IndexOf(e);
-                }
-            }
-            //   SelectValueChanged?.Invoke(this,e.Text);
-        }
+      
 
         private void InitPanel2()
         {

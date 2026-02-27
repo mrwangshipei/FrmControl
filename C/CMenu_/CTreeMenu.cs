@@ -144,8 +144,8 @@ namespace FrmControl.C.CMenu_
                     Point clientpoint = this.ClientPointToControlPoint(ClickAt);
 
                     if (rect.Contains(clientpoint)) {
-                        SelectedNode = nodes[i];
                         nodes[i].Selected = true;
+                        SelectedNode = nodes[i];
                     }
                     else
                     {
@@ -155,6 +155,7 @@ namespace FrmControl.C.CMenu_
                 nodes[i].OnPaint(rect, g, NodeBackColor, NodeForeColor, SelectedNodeBackColor, SelectedNodeForeColor, Font);
 
             }
+            ClickAt = new Point();
         }
 
 

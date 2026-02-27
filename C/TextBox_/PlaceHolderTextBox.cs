@@ -1,68 +1,54 @@
 ﻿using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 public class PlaceholderTextBox : TextBox
 {
-    private string _placeholderText;
-    private bool _isPlaceholderActive;
+	private const int WM_PAINT = 0x000F;
 
-    // 新增属性
-    public char PasswordChars { get; set; }
-    public Color PlaceholderColor { get; set; }
+	public string PlaceholderText { get; set; } = "";
+	public Color PlaceholderColor { get; set; } = Color.Gray;
 
-    public PlaceholderTextBox()
-    {
-        this.PlaceholderColor = Color.Gray; // 默认占位符颜色
-        this.Text = _placeholderText;
+	public PlaceholderTextBox()
+	{
+		SetStyle(ControlStyles.UserPaint, false);
+	}
 
-        // 监听控件的事件
-        this.Enter += (sender, e) =>
-        {
-            if (this.Text == _placeholderText)
-            {
-                this.Text = "";
-                this.ForeColor = System.Drawing.Color.Black;
-                _isPlaceholderActive = false;
-            }
+	protected override void WndProc(ref Message m)
+	{
+		base.WndProc(ref m);
 
-            // 如果设置了密码字符
-            if (this.PasswordChars != '\0')
-            {
-                this.UseSystemPasswordChar = true;
-            }
-        };
+		if (m.Msg == WM_PAINT)
+		{
+			DrawPlaceholder();
+		}
+	}
 
-        this.Leave += (sender, e) =>
-        {
-            if (string.IsNullOrWhiteSpace(this.Text))
-            {
-                this.Text = _placeholderText;
-                this.ForeColor = PlaceholderColor; // 使用指定的占位符颜色
-                _isPlaceholderActive = true;
-                this.UseSystemPasswordChar = false; // 取消密码字符显示
-            }
-        };
-    }
+	private void DrawPlaceholder()
+	{
+		// 有内容 or 有焦点 → 不画 Placeholder
+		if (!string.IsNullOrEmpty(this.Text) || this.Focused)
+			return;
 
-    public string PlaceholderText
-    {
-        get { return _placeholderText; }
-        set { _placeholderText = value; }
-    }
+		using (Graphics g = Graphics.FromHwnd(this.Handle))
+		{
+			TextFormatFlags flags =
+				TextFormatFlags.Left |
+				TextFormatFlags.VerticalCenter |
+				TextFormatFlags.NoPadding;
 
-    // 覆盖OnTextChanged事件，使得密码框始终能显示密码字符
-    protected override void OnTextChanged(EventArgs e)
-    {
-        base.OnTextChanged(e);
+			Rectangle rect = ClientRectangle;
+			rect.Offset(1, 1); // 轻微偏移更自然
 
-        if (this.PasswordChars != '\0' && !string.IsNullOrEmpty(this.Text) && this.Text != _placeholderText)
-        {
-            this.UseSystemPasswordChar = true;
-        }
-        else
-        {
-            this.UseSystemPasswordChar = false;
-        }
-    }
+			TextRenderer.DrawText(
+				g,
+				PlaceholderText,
+				this.Font,
+				rect,
+				PlaceholderColor,
+				flags
+			);
+		}
+	}
 }

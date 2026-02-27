@@ -1,11 +1,12 @@
-﻿using System;
+﻿using FCT.Model;
+using FrmControl.C.Base;
+using System;
 using System.Collections.Generic;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FCT.Model;
-using FrmControl.C.Base;
 using Timer = System.Windows.Forms.Timer;
 
 namespace FrmControl.C.CPanel_
@@ -82,36 +83,88 @@ namespace FrmControl.C.CPanel_
                 ControlStyles.SupportsTransparentBackColor,
                 true);
             DoubleBuffered = true;
-         
-        }
+			this.UpdateStyles();
 
-    
-        protected override void OnSizeChanged(EventArgs e)
-        {
-            base.OnSizeChanged(e);
-            Invalidate();
-        }
-    
+		}
+
+
+	
 
         protected override void OnPaddingChanged(EventArgs e)
         {
             base.OnPaddingChanged(e);
             Invalidate();            
         }
-        protected override void OnPaintBackground(PaintEventArgs e)
-        {
-            base.OnPaintBackground(e);
-            var g = e.Graphics;
-            Rectangle rectangle = this.ClientRectangle;
-            rectangle.ChangeRectangle(this.Padding);
-            using (var path = rectangle.CreateRoundedRectanglePath(Radius))
-            {
-                using (Brush br = new SolidBrush(Color.FromArgb((int)(255*BackTColorTran),BackTColor)))
-                {
-                    g.FillPath(br, path);
-                }
-            }
+		//protected override void OnPaintBackground(PaintEventArgs e)
+		//{
+		//    base.OnPaintBackground(e);
+		//    var g = e.Graphics;
+		//    Rectangle rectangle = this.ClientRectangle;
+		//    rectangle.ChangeRectangle(this.Padding);
+		//    using (var path = rectangle.CreateRoundedRectanglePath(Radius))
+		//    {
+		//        using (Brush br = new SolidBrush(Color.FromArgb((int)(255*BackTColorTran),BackTColor)))
+		//        {
+		//            g.FillPath(br, path);
+		//        }
+		//    }
 
-        }
-    }
+		//}
+		private GraphicsPath _cachedPath;
+		private Rectangle _cachedRect;
+		private int _cachedRadius = -1;
+		private Color _cachedColor;
+		private Brush _cachedBrush;
+
+		private void EnsureCache()
+		{
+			var rect = this.ClientRectangle;
+			rect.ChangeRectangle(this.Padding);
+			var color = Color.FromArgb((int)(255 * BackTColorTran), BackTColor);
+
+			if (_cachedPath != null &&
+				rect == _cachedRect &&
+				Radius == _cachedRadius &&
+				color == _cachedColor)
+				return;
+
+			_cachedPath?.Dispose();
+			_cachedBrush?.Dispose();
+
+			_cachedRect = rect;
+			_cachedRadius = Radius;
+			_cachedColor = color;
+
+			_cachedPath = rect.CreateRoundedRectanglePath(Radius);
+			_cachedBrush = new SolidBrush(color);
+		}
+
+		protected override void OnSizeChanged(EventArgs e)
+		{
+			base.OnSizeChanged(e);
+			InvalidateCache();
+		}
+
+		private void InvalidateCache()
+		{
+			_cachedPath?.Dispose(); _cachedPath = null;
+			_cachedBrush?.Dispose(); _cachedBrush = null;
+		}
+
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			base.OnPaint(e);
+			EnsureCache();
+			if (_cachedPath != null && _cachedBrush != null)
+				e.Graphics.FillPath(_cachedBrush, _cachedPath);
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing) InvalidateCache();
+			base.Dispose(disposing);
+		}
+
+
+	}
 }
