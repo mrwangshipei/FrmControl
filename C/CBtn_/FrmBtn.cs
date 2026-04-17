@@ -13,83 +13,101 @@ using System.Windows.Forms;
 namespace FrmControl.C.Btn
 {
 	[DefaultEvent("Click")]
-    public class FrmBtn : CBaseControl
+	public class FrmBtn : CBaseControl
 	{
-       
-        // 默认背景颜色
-        public Color defaultBackColor { 
-			get => defaultBackColor1; 
-			set 
-			{ 
+
+		// 默认背景颜色
+		public Color defaultBackColor
+		{
+			get => defaultBackColor1;
+			set
+			{
 				defaultBackColor1 = value;
 				this.BackColor = value;
-                this.Invalidate();
+				this.Invalidate();
 
-            }
-        }         // 鼠标悬停时的背景颜色
+			}
+		}         // 鼠标悬停时的背景颜色
 		public Color hoverBackColor { get; set; } = Color.LightGray;
 		// 鼠标按下时的背景颜色
 		public Color pressedBackColor { get; set; } = Color.Gray;
 
-        public float smallimg { get => smallimg1; set { smallimg1 = value; 
-			this.Invalidate();
+		public float smallimg
+		{
+			get => smallimg1; set
+			{
+				smallimg1 = value;
+				this.Invalidate();
 
-            }
-        }
-        public float BorderWidth { get => borderWidth; set {borderWidth = value; 
-			this.Invalidate();
-            }
-        }
-        public Color BorderColor { get => borderColor; set{ borderColor = value;
-			this.Invalidate();
+			}
+		}
+		public float BorderWidth
+		{
+			get => borderWidth; set
+			{
+				borderWidth = value;
+				this.Invalidate();
+			}
+		}
+		public Color BorderColor
+		{
+			get => borderColor; set
+			{
+				borderColor = value;
+				this.Invalidate();
 
-            }
-        }
-        public string FrmText { get => frmText; set{  frmText = value; 
-			this.Invalidate();
-			} }
-        public Image BackImg { get; set; }
+			}
+		}
+		public string FrmText
+		{
+			get => frmText; set
+			{
+				frmText = value;
+				this.Invalidate();
+			}
+		}
+		public Image BackImg { get; set; }
 		public float ImgPix { get; set; } = 0f;
 		private float lastell;
 		public float ell;
 		private bool IsMouseDown;
-        public bool Issquare { get; set; }
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                CreateParams cp = base.CreateParams;
-                cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
-                return cp;
-            }
-        }
-        public float Radius { get { return ell; } set { ell = value;Invalidate(); } }
-        public FrmBtn()
-        {
-            // 启用双缓冲和透明背景
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint |
-                          ControlStyles.OptimizedDoubleBuffer |
-                          ControlStyles.UserPaint |
-                          ControlStyles.SupportsTransparentBackColor, true);
+		public bool Issquare { get; set; }
+		protected override CreateParams CreateParams
+		{
+			get
+			{
+				CreateParams cp = base.CreateParams;
+				cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+				return cp;
+			}
+		}
+		public float Radius { get { return ell; } set { ell = value; Invalidate(); } }
+		public FrmBtn()
+		{
+			// 启用双缓冲和透明背景
+			this.SetStyle(ControlStyles.AllPaintingInWmPaint |
+						  ControlStyles.OptimizedDoubleBuffer |
+						  ControlStyles.UserPaint |
+						  ControlStyles.SupportsTransparentBackColor, true);
 			this.DoubleBuffered = true;
-        }
-        private Rectangle Lastr;
-        private Color defaultBackColor1 = Color.White;
-        private string frmText;
-        private float borderWidth = 1;
-        private Color borderColor = Color.Black;
-        private float smallimg1 = 1;
+		}
+		private Rectangle Lastr;
+		private Color defaultBackColor1 = Color.White;
+		private string frmText;
+		private float borderWidth = 1;
+		private Color borderColor = Color.Black;
+		private float smallimg1 = 1;
 
-        protected override void OnPaint(PaintEventArgs e)
+		protected override void OnPaint(PaintEventArgs e)
 		{
 			if (Radius != lastell || !Rectangle.Equals(this.ClientRectangle, Lastr))
 			{
 				Lastr = this.ClientRectangle;
 				lastell = Radius;
-                this.Region = new Region(GraphicsExtensions.GetRoundedRectangle(this.ClientRectangle, Radius));
+				this.Region = new Region(GraphicsExtensions.GetRoundedRectangle(this.ClientRectangle, Radius));
 			}
 
-            var gp = e.Graphics;
+			var gp = e.Graphics;
 			using (var bs = new SolidBrush(BackColor))
 			{
 
@@ -97,52 +115,52 @@ namespace FrmControl.C.Btn
 			}
 			gp.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
 			gp.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-			
-			var s  = gp.MeasureString(FrmText, Font);
+
+			var s = gp.MeasureString(FrmText, Font);
 			float fontsta = Width * ImgPix;
-			float center = ((Width - fontsta) - s.Width)/2+fontsta;
+			float center = ((Width - fontsta) - s.Width) / 2 + fontsta;
 			if (center < fontsta)
 			{
 				center = fontsta;
 			}
-			gp.DrawString(FrmText, Font,new SolidBrush(ForeColor),center, (Height - s.Height) /2);
+			gp.DrawString(FrmText, Font, new SolidBrush(ForeColor), center, (Height - s.Height) / 2);
 			if (BorderWidth != 0)
 			{
 
-				var path  = GraphicsExtensions.GetRoundedRectangle(new Rectangle((int)(this.ClientRectangle.X + BorderWidth / 2), (int)(this.ClientRectangle.Y + (BorderWidth / 2)), (int)(this.ClientRectangle.Width - BorderWidth), (int)(this.ClientRectangle.Height - BorderWidth)), Radius);
-				gp.DrawPath(new Pen(BorderColor, BorderWidth ),path); ;
-			
+				var path = GraphicsExtensions.GetRoundedRectangle(new Rectangle((int)(this.ClientRectangle.X + BorderWidth / 2), (int)(this.ClientRectangle.Y + (BorderWidth / 2)), (int)(this.ClientRectangle.Width - BorderWidth), (int)(this.ClientRectangle.Height - BorderWidth)), Radius);
+				gp.DrawPath(new Pen(BorderColor, BorderWidth), path); ;
+
 
 			}
-            base.OnPaint(e);
-            if (BackImg != null)
-            {
-                int x = (int)((Height - Height * smallimg) / 2);
-                int y = (int)((Width - Width * smallimg) / 2);
-                int Wid = (int)(Width * smallimg);
-                int Hei = (int)(Height * smallimg);
-                gp.DrawImage(BackImg, x, y, Wid, Hei);
-            }
-        }
-        protected override void OnTextChanged(EventArgs e)
-        {
-            base.OnTextChanged(e);
+			base.OnPaint(e);
+			if (BackImg != null)
+			{
+				int x = (int)((Height - Height * smallimg) / 2);
+				int y = (int)((Width - Width * smallimg) / 2);
+				int Wid = (int)(Width * smallimg);
+				int Hei = (int)(Height * smallimg);
+				gp.DrawImage(BackImg, x, y, Wid, Hei);
+			}
+		}
+		protected override void OnTextChanged(EventArgs e)
+		{
+			base.OnTextChanged(e);
 			FrmText = Text;
-        }
-        protected override void OnPaintBackground(PaintEventArgs pevent)
-        {
-            if (Radius != lastell || !Rectangle.Equals(this.ClientRectangle, Lastr))
-            {
-                if (Region != null)
-                {
-                    Region.Dispose();
-                }
-                Lastr = this.ClientRectangle;
-                this.Region = new Region(GraphicsExtensions.GetRoundedRectangle(this.ClientRectangle, Radius));
-                lastell = Radius;
-            }
-        }
-        protected override void OnSizeChanged(EventArgs e)
+		}
+		protected override void OnPaintBackground(PaintEventArgs pevent)
+		{
+			if (Radius != lastell || !Rectangle.Equals(this.ClientRectangle, Lastr))
+			{
+				if (Region != null)
+				{
+					Region.Dispose();
+				}
+				Lastr = this.ClientRectangle;
+				this.Region = new Region(GraphicsExtensions.GetRoundedRectangle(this.ClientRectangle, Radius));
+				lastell = Radius;
+			}
+		}
+		protected override void OnSizeChanged(EventArgs e)
 		{
 			base.OnSizeChanged(e);
 			if (Issquare && this.Width != Height)
@@ -150,7 +168,7 @@ namespace FrmControl.C.Btn
 				Width = Height;
 				Radius = Width / 2;
 			}
-	//		this.Region = new Region(GraphicsExtensions.GetRoundedRectangle(this.ClientRectangle, Radius));
+			//		this.Region = new Region(GraphicsExtensions.GetRoundedRectangle(this.ClientRectangle, Radius));
 			//
 		}
 
@@ -194,24 +212,24 @@ namespace FrmControl.C.Btn
 			base.OnMouseDown(e);
 			IsMouseDown = true;
 		}
-        protected override void OnLocationChanged(EventArgs e)
-        {
-            base.OnLocationChanged(e);
-            // 每次位置变化，就更新 Region 保证圆角
-          //  this.Region = new Region(GraphicsExtensions.GetRoundedRectangle(this.ClientRectangle, Radius));
-        }
+		protected override void OnLocationChanged(EventArgs e)
+		{
+			base.OnLocationChanged(e);
+			// 每次位置变化，就更新 Region 保证圆角
+			//  this.Region = new Region(GraphicsExtensions.GetRoundedRectangle(this.ClientRectangle, Radius));
+		}
 
-        // 鼠标释放时触发
-        protected override void OnMouseUp( MouseEventArgs e)
+		// 鼠标释放时触发
+		protected override void OnMouseUp(MouseEventArgs e)
 		{
 			if (this.IsDisposed)
 			{
-				return; 
+				return;
 			}
-            IsMouseDown = false;
+			IsMouseDown = false;
 
-            // 恢复背景颜色为默认颜色（如果鼠标仍在控件内）
-            if (this.ClientRectangle.Contains(this.PointToClient(Control.MousePosition)))
+			// 恢复背景颜色为默认颜色（如果鼠标仍在控件内）
+			if (this.ClientRectangle.Contains(this.PointToClient(Control.MousePosition)))
 			{
 				this.BackColor = hoverBackColor; // 或者根据需求恢复为默认颜色或其他颜色
 			}

@@ -15,7 +15,18 @@ namespace FrmBase_
 			var r = fm.ShowDialog(parent);
 			return r;
 		}
-
+		public static DialogResult ShowDialog(Form parent, string msg, string title,Image img)
+		{
+			FrmDialog fm = new FrmDialog();
+			fm.Text = title;
+			fm.label11.Text = msg;
+			fm.Owner = parent;
+			fm.panel4.Visible = true;
+			fm.panel4.BackgroundImage = img;
+			fm.panel4.BackgroundImageLayout = ImageLayout.Zoom;
+			var r = fm.ShowDialog(parent);
+			return r;
+		}
 		public static DialogResult ShowDialog(string msg, string title)
 		{
 			FrmDialog fm = new FrmDialog();

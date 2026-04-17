@@ -3,14 +3,14 @@ using System.Drawing;
 using System.Windows.Forms;
 using Timer = System.Windows.Forms.Timer;
 
-public sealed class FrmHalfScreenToast : Form
+public sealed class FrmLitleScreenToast : Form
 {
 	private readonly Timer _timer;
 	private readonly Label _titleLabel;
 	private readonly Label _msgLabel;
 	private readonly Panel _contentPanel;
 
-	private FrmHalfScreenToast(string title, string message, int durationMs)
+	private FrmLitleScreenToast(string title, string message, int durationMs, bool isSuccess)
 	{
 		InitializeComponent();
 		// ===== Form 基本属性（无动画、无任务栏图标、置顶）=====
@@ -106,25 +106,60 @@ public sealed class FrmHalfScreenToast : Form
 		),
 			BackColor = Color.Transparent
 		};
-		iconBox.Location = new Point(((_contentPanel.Width - 52) / 2), 120);
+		iconBox.Location = new Point(((_contentPanel.Width - 52) / 2), 200);
 
 		//	_contentPanel.Size = new Size(520, 200);
 
+		//iconBox.Paint += (s, e) =>
+		//{
+		//	e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+		//	using (var pen = new Pen(Color.FromArgb(0, 168, 84), 4))
+		//	{
+		//		e.Graphics.DrawEllipse(pen, 6, 6, 40, 40);
+		//		// 对勾
+		//		e.Graphics.DrawLines(pen, new[]
+		//		{
+		//			new Point(16, 28),
+		//			new Point(24, 36),
+		//			new Point(38, 20)
+		//		});
+		//	}
+		//};
 		iconBox.Paint += (s, e) =>
 		{
 			e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-			using (var pen = new Pen(Color.FromArgb(0, 168, 84), 4))
+
+			if (isSuccess)
 			{
-				e.Graphics.DrawEllipse(pen, 6, 6, 40, 40);
-				// 对勾
-				e.Graphics.DrawLines(pen, new[]
+				using (var pen = new Pen(Color.FromArgb(0, 168, 84), 4))
 				{
-					new Point(16, 28),
-					new Point(24, 36),
-					new Point(38, 20)
-				});
+					e.Graphics.DrawEllipse(pen, 6, 6, 40, 40);
+
+					// ✔
+					e.Graphics.DrawLines(pen, new[]
+					{
+				new Point(16, 28),
+				new Point(24, 36),
+				new Point(38, 20)
+			});
+				}
+			}
+			else
+			{
+				using (var pen = new Pen(Color.FromArgb(220, 53, 69), 4))
+				{
+					e.Graphics.DrawEllipse(pen, 6, 6, 40, 40);
+
+					// ✖
+					e.Graphics.DrawLine(pen, 16, 16, 36, 36);
+					e.Graphics.DrawLine(pen, 36, 16, 16, 36);
+				}
 			}
 		};
+		_titleLabel.ForeColor = isSuccess
+	? Color.FromArgb(34, 34, 34)
+	: Color.FromArgb(220, 53, 69);
+
 		_contentPanel.Controls.Add(iconBox);
 		iconBox.BringToFront();
 		// 点击任意地方关闭
@@ -150,6 +185,17 @@ public sealed class FrmHalfScreenToast : Form
 		// 屏幕变化时（多显示器/分辨率变化）重新布局
 		SystemEvents_DisplaySettingsChangedHook();
 	}
+	public static void ShowFail(string message, int durationMs = 2200, string title = "产品测试失败")
+	{
+		if (Application.OpenForms.Count > 0 && Application.OpenForms[0].InvokeRequired)
+		{
+			Application.OpenForms[0].BeginInvoke(new Action(() => ShowFail(message, durationMs, title)));
+			return;
+		}
+
+		var toast = new FrmLitleScreenToast(title, message, durationMs, false);
+		toast.Show();
+	}
 
 	// ===== 外部静态调用 =====
 	public static void ShowSuccess(string message, int durationMs = 1800, string title = "产品测试成功")
@@ -161,23 +207,10 @@ public sealed class FrmHalfScreenToast : Form
 			return;
 		}
 
-		var toast = new FrmHalfScreenToast(title, message, durationMs);
+		var toast = new FrmLitleScreenToast(title, message, durationMs,true);
 		toast.Show();
 	}
 
-	// ===== 位置：覆盖下半屏 =====
-	private void LayoutToHalfScreenBottom()
-	{
-		//var screen = Screen.FromPoint(Cursor.Position); // 优先当前鼠标所在屏幕
-		//var wa = screen.WorkingArea;
-
-		_contentPanel.Dock = DockStyle.Fill;
-		// 卡片放在中间偏上
-		//_contentPanel.Location = new Point(
-		//	(ClientSize.Width - _contentPanel.Width) / 2,
-		//	Math.Max(20, (ClientSize.Height - _contentPanel.Height) / 2 - 10)
-		//);
-	}
 
 	// ===== 不抢焦点（可选）=====
 	protected override bool ShowWithoutActivation => true;

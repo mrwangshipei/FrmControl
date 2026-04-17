@@ -230,33 +230,118 @@ namespace FrmControl.C
         {
             InitializeComponent();
             this.TabStop = false;
+            BackColor = Color.Transparent;
             lblTips.Paint += lblTips_Paint;
             this.lbl.MouseEnter += lbl_MouseEnter;
             this.lbl.MouseLeave += lbl_MouseLeave;
             this.BtnClick += ChangeCheck;
             CheckedChanged += thisCheckChanged;
         }
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            base.OnPaint(e);
-            var gp = e.Graphics;    
-            if (ischecked)
-            {
-                {
-                    gp.FillRectangle(CheckColor, this.ClientRectangle);
-                }
 
-            }
-            else
-            {
-                {
-                    gp.FillRectangle(UnCheckColor, this.ClientRectangle);
-                }
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			base.OnPaint(e);
+			Graphics g = e.Graphics;
+			g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
+			// 圆角矩形
+			int radius = 8; // 圆角半径
+			var rect = new Rectangle(0, 0, this.Width - 1, this.Height - 1);
+			var path = RoundedRect(rect, radius);
 
-            }
-        }
-        private void thisCheckChanged(object sender, EventArgs e)
+			// 背景颜色
+			Brush bgBrush;
+			if (ischecked)
+			{
+				bgBrush = new SolidBrush((checkcolor as SolidBrush)?.Color ?? Color.Gray);
+			}
+			else
+			{
+				bgBrush = new SolidBrush((uncheckcolor as SolidBrush)?.Color ?? Color.LightGray);
+			}
+
+			// 鼠标悬停高亮效果
+			if (enabledMouseEffect && m_cacheColor != Color.Empty)
+			{
+				bgBrush = new SolidBrush(m_cacheColor);
+			}
+
+			g.FillPath(bgBrush, path);
+
+			// 边框
+			using (Pen pen = new Pen(Color.FromArgb(200, 200, 200)))
+			{
+				g.DrawPath(pen, path);
+			}
+
+			// 文字居中绘制
+			//TextRenderer.DrawText(
+			//	g,
+			//	lbl.Text,
+			//	lbl.Font,
+			//	rect,
+			//	lbl.ForeColor,
+			//	TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter
+			//);
+
+			// 绘制右上角的圆形标识
+			int circleSize = 12; // 圆形标识大小
+			int x = this.Width - circleSize - 4; // X 坐标
+			int y = 4; // Y 坐标
+			Brush circleBrush = ischecked ? new SolidBrush(Color.LightGray) : new SolidBrush(Color.DarkGray);
+
+			g.FillEllipse(circleBrush, x, y, circleSize, circleSize);
+
+			// 可绘制角标
+			if (lblTips.Visible)
+			{
+				int tipSize = Math.Min(lblTips.Width, lblTips.Height);
+				Rectangle tipRect = new Rectangle(this.Width - tipSize - 2, 2, tipSize, tipSize);
+				using (Brush tipBrush = new SolidBrush(m_tipsColor))
+				{
+					g.FillEllipse(tipBrush, tipRect);
+				}
+				if (!string.IsNullOrEmpty(TipsText))
+				{
+					var sf = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+					g.DrawString(TipsText, lblTips.Font, new SolidBrush(lblTips.ForeColor), tipRect, sf);
+				}
+			}
+		}
+
+		// 创建圆角矩形路径
+		private System.Drawing.Drawing2D.GraphicsPath RoundedRect(Rectangle rect, int radius)
+		{
+			var path = new System.Drawing.Drawing2D.GraphicsPath();
+			path.AddArc(rect.X, rect.Y, radius * 2, radius * 2, 180, 90);
+			path.AddArc(rect.Right - radius * 2, rect.Y, radius * 2, radius * 2, 270, 90);
+			path.AddArc(rect.Right - radius * 2, rect.Bottom - radius * 2, radius * 2, radius * 2, 0, 90);
+			path.AddArc(rect.X, rect.Bottom - radius * 2, radius * 2, radius * 2, 90, 90);
+			path.CloseFigure();
+			return path;
+		}
+
+		// 鼠标进入/离开修改颜色
+		void lbl_MouseEnter(object sender, EventArgs e)
+		{
+			if (enabledMouseEffect)
+			{
+				m_cacheColor = (ischecked ? (checkcolor as SolidBrush)?.Color ?? Color.Gray : (uncheckcolor as SolidBrush)?.Color ?? Color.LightGray)
+					.ChangeColor(-0.15f); // 高亮
+				Invalidate();
+			}
+		}
+
+		void lbl_MouseLeave(object sender, EventArgs e)
+		{
+			if (enabledMouseEffect)
+			{
+				m_cacheColor = Color.Empty;
+				Invalidate();
+			}
+		}
+
+		private void thisCheckChanged(object sender, EventArgs e)
         {
             if (Parent == null) {
                 return;
@@ -296,43 +381,7 @@ namespace FrmControl.C
         public Color FillColor { get=>BackColor; set=> BackColor = value; }
 
         Color m_cacheColor = Color.Empty;
-        void lbl_MouseLeave(object sender, EventArgs e)
-        {
-            if (enabledMouseEffect)
-            {
-                if (MouseEffecting != null && MouseEffected != null)
-                {
-                    MouseEffected(this, e);
-                }
-                else
-                {
-                    if (m_cacheColor != Color.Empty)
-                    {
-                        this.FillColor = m_cacheColor;
-                        m_cacheColor = Color.Empty;
-                    }
-                }
-            }
-        }
-
-        void lbl_MouseEnter(object sender, EventArgs e)
-        {
-            if (enabledMouseEffect)
-            {
-                if (MouseEffecting != null && MouseEffected != null)
-                {
-                    MouseEffecting(this, e);
-                }
-                else
-                {
-                    if (FillColor != Color.Empty && FillColor != null)
-                    {
-                        m_cacheColor = this.FillColor;
-                        this.FillColor = this.FillColor.ChangeColor(-0.2f);
-                    }
-                }
-            }
-        }
+   
 
         /// <summary>
         /// Handles the Paint event of the lblTips control.
@@ -341,11 +390,7 @@ namespace FrmControl.C
         /// <param name="e">The <see cref="PaintEventArgs" /> instance containing the event data.</param>
         void lblTips_Paint(object sender, PaintEventArgs e)
         {
-           // e.Graphics.FillEllipse(new SolidBrush(m_tipsColor), new Rectangle(0, 0, lblTips.Width - 1, lblTips.Height - 1));
-          //  System.Drawing.SizeF sizeEnd = e.Graphics.MeasureString(TipsText, lblTips.Font);
-
-      //      e.Graphics.DrawString(TipsText, lblTips.Font, new SolidBrush(lblTips.ForeColor), new PointF((lblTips.Width - sizeEnd.Width) / 2, (lblTips.Height - sizeEnd.Height) / 2 + 1));
-        }
+         }
 
         /// <summary>
         /// Handles the MouseDown event of the lbl control.

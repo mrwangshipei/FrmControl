@@ -6,26 +6,22 @@ using Timer = System.Windows.Forms.Timer;
 
 namespace IndustrialTip
 {
-	public class TipForm : Form
+	internal class TipForm : Form
 	{
-		public Color SuccessColor => Color.FromArgb(40, 120, 40);
-		public Color ErrorColor => Color.FromArgb(140, 30, 30);
-		//private readonly Color successColor = Color.FromArgb(40, 120, 40);
-		//private readonly Color errorColor = Color.FromArgb(140, 30, 30);
-		private readonly Color normalColor = Color.FromArgb(46, 46, 46);
 		private static TipForm _instance;
 		public static TipForm Instance => _instance ?? (_instance = new TipForm());
 
 		private Label lblText;
 		private Timer flashTimer;
 		private bool flashState;
+		private Color normalColor;
 
+		private readonly int expandedWidth = 280;
 		private readonly int collapsedWidth = 24;
+		private readonly int height = 60;
 		private readonly int radius = 12;
-		private readonly int expandedWidth = 360;
-		private readonly int height = 72;
 
-		public TipForm()
+		private TipForm()
 		{
 			InitForm();
 			InitControls();
@@ -41,7 +37,7 @@ namespace IndustrialTip
 			DoubleBuffered = true;
 			StartPosition = FormStartPosition.Manual;
 
-			//normalColor = Color.FromArgb(46, 46, 46);
+			normalColor = Color.FromArgb(46, 46, 46);
 			BackColor = normalColor;
 
 			Size = new Size(collapsedWidth, height);
@@ -54,19 +50,17 @@ namespace IndustrialTip
 				Dock = DockStyle.Fill,
 				ForeColor = Color.White,
 				TextAlign = ContentAlignment.MiddleLeft,
-				Padding = new Padding(16, 0, 16, 0),
-				AutoEllipsis = true,
-				Font = new Font("Microsoft YaHei", 14F, FontStyle.Bold)
+				Padding = new Padding(12, 0, 12, 0),
+				AutoEllipsis = true
 			};
-
 
 			Controls.Add(lblText);
 
 			SizeChanged += (s, e) =>
 			{
 				UpdateRightRoundedRegion(radius);
-				StickToLeftTop();     
-				};
+				StickToBottomRight();
+			};
 		}
 
 		public void SetText(string text)
@@ -76,7 +70,7 @@ namespace IndustrialTip
 
 		public void SetBackColor(Color c)
 		{
-			//normalColor = c;
+			normalColor = c;
 			BackColor = c;
 		}
 
@@ -160,15 +154,14 @@ namespace IndustrialTip
 
 		#region 贴屏幕右下角（多屏安全）
 
-		private void StickToLeftTop()
+		private void StickToBottomRight()
 		{
 			Screen screen = Screen.FromControl(Owner ?? this);
 			Rectangle area = screen.WorkingArea;
 
-			Left = area.Left + 20;
-			Top = area.Top + 80;   // 偏上，显眼但不贴顶
+			Left = area.Right - Width - 2;
+			Top = area.Bottom - Height - 2;
 		}
-
 
 		#endregion
 

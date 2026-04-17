@@ -91,7 +91,7 @@ namespace FrmControl.FrmPremission
 		{
 			if (comboBox1.SelectedValue == null)
 			{
-				MyTips.ShowTips(this,Tipstype.Warn,"请先选择一个权限");
+				MyTips.Show(this,Tipstype.Warn,"请先选择一个权限");
 				return;
 			}
 			var sr = (Role)comboBox1.SelectedValue;

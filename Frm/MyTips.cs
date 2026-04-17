@@ -1,413 +1,518 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Reflection.Emit;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FrmControl.FrmBase_;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace FrmControl.Frm
 {
 	public partial class MyTips : FrmBase
-    {
+	{
 		public MyTips()
 		{
 			InitializeComponent();
 			ShowInTaskbar = false;
-            FormClosed += MyTips_FormClosed;
-
-        }
-		public float radius { get; set; } = 10;
-        public int _ImageIndex;
-        public int ImageIndex { get=>_ImageIndex; set {
-                _ImageIndex = value;
-                Invalidate();
-            } }
-
-        public static List<MyTips> useing_Tips = new List<MyTips>();
-		public static MyTips ShowTips(Form BaseForm, Tipstype Type, string msg, int waittime = 2000, bool inWindow = true)
-		{
-            MyTips m = null;
-            if (BaseForm != null && BaseForm.InvokeRequired)
-			{
-				BaseForm.Invoke(new Action(() => {
-					m = ShowTip(BaseForm, Type, msg, waittime , inWindow);
-				}));
-			}
-			else
-			{
-				m = ShowTip(BaseForm, Type, msg, waittime, inWindow);
-			}
-            return m;
+			FormClosed += MyTips_FormClosed;
 		}
-		public static MyTips ShowTips(Tipstype Type, string msg, int waittime = 2000)
+
+		public float radius { get; set; } = 10f;
+
+		private int _ImageIndex;
+		public int ImageIndex
 		{
-			return ShowTips(null, Type, msg, waittime, false);
-
-        }
-        /// <summary>
-        /// 显示成功提示（独立窗口，无父窗体关联）
-        /// </summary>
-        public static MyTips ShowTipSuccess(string message, int waitTime = 2000)
-        {
-            return ShowTip(null, Tipstype.Success, message, waitTime, inWindow: false);
-        }
-
-        /// <summary>
-        /// 显示信息提示（独立窗口，无父窗体关联）
-        /// </summary>
-        public static MyTips ShowTipTip(string message, int waitTime = 2000)
-        {
-            return ShowTip(null, Tipstype.Tip, message, waitTime, inWindow: false);
-        }
-
-        /// <summary>
-        /// 显示警告提示（独立窗口，无父窗体关联）
-        /// </summary>
-        public static MyTips ShowTipWarn(string message, int waitTime = 2000)
-        {
-            return ShowTip(null, Tipstype.Warn, message, waitTime, inWindow: false);
-        }
-
-        /// <summary>
-        /// 显示错误提示（独立窗口，无父窗体关联）
-        /// </summary>
-        public static MyTips ShowTipError(string message, int waitTime = 2000)
-        {
-            return ShowTip(null, Tipstype.Error, message, waitTime, inWindow: false);
-        }
-        // 扩展调用方法 
-        /// <summary>
-        /// 显示调试类提示 
-        /// </summary>
-        /// <param name="baseForm">承载提示窗体的父容器</param>
-        /// <param name="message">提示信息内容</param>
-        /// <param name="waitTime">提示持续时长(ms)，默认2000ms</param>
-        /// <param name="inWindow">是否在窗体内部显示，默认true</param>
-        public static MyTips ShowTipSuccess(Form baseForm, string message, int waitTime = 2000, bool inWindow = true)
-        {
-            return ShowTip(baseForm, Tipstype.Success, message, waitTime, inWindow);
-        }
-
-        /// <summary>
-        /// 显示信息类提示 
-        /// </summary>
-        public static MyTips ShowTipTip(Form baseForm, string message, int waitTime = 2000, bool inWindow = true)
-        {
-            return ShowTip(baseForm, Tipstype.Tip, message, waitTime, inWindow);
-        }
-
-        /// <summary>
-        /// 显示警告类提示 
-        /// </summary>
-        public static MyTips ShowTipWarn(Form baseForm, string message, int waitTime = 2000, bool inWindow = true)
-        {
-            return ShowTip(baseForm, Tipstype.Warn, message, waitTime, inWindow);
-        }
-
-        /// <summary>
-        /// 显示错误类提示 
-        /// </summary>
-        public static MyTips ShowTipError(Form baseForm, string message, int waitTime = 2000, bool inWindow = true)
-        {
-            return ShowTip(baseForm, Tipstype.Error, message, waitTime, inWindow);
-        }
-        private static MyTips ShowTip(Form BaseForm,Tipstype Type, string msg,int waittime = 2000,bool inWindow = true) 
-		{
-            MyTips tip = null;
-            if (BaseForm != null && BaseForm.InvokeRequired)
-            {
-                BaseForm.Invoke(() =>
-                {
-                   tip =  ShowTip(BaseForm, Type, msg, waittime, inWindow);
-                });
-                return tip;
-            }
-            else if (BaseForm == null)
-            {
-                if (Application.OpenForms.Count > 0 && Application.OpenForms[0].InvokeRequired)
-                {
-                    Application.OpenForms[0].Invoke(() =>
-                    {
-                        tip = ShowTip(Application.OpenForms[0], Type, msg, waittime, inWindow);
-                    });
-                    //Application.OpenForms[0].Invoke(ShowTip, Application.OpenForms[0], Type, msg, waittime, inWindow);
-                    return tip;
-                }
-                else
-                {
-                    return tip;
-                }
-            }
-            MyTips myTips = null;
-            lock (useing_Tips)
-            {
-                if (useing_Tips.Count > 0 && useing_Tips.Last().Visible)
-		        {
-                    myTips = useing_Tips.Last();
-		        }
-            }
-            myTips?.CloseWindow(null, null);
-
-            MyTips tips = new MyTips();
-
-            switch (Type)
-            {
-                case Tipstype.Warn:
-                    // 黄色系，但偏金黄，显得更大气
-                    tips.BackColor = ColorTranslator.FromHtml("#D68910"); // 类似金色
-                    tips.ForeColor = Color.White;
-                    break;
-
-                case Tipstype.Success:
-                    // 稳重大气的绿色
-                    tips.BackColor = ColorTranslator.FromHtml("#27AE60"); // 深绿
-                    tips.ForeColor = Color.White;
-                    break;
-
-                case Tipstype.Tip:
-                    // 清爽的蓝色系
-                    tips.BackColor = ColorTranslator.FromHtml("#2980B9"); // 深蓝
-                    tips.ForeColor = Color.White;
-                    break;
-
-                case Tipstype.Error:
-                    // 激情且沉稳的红色系
-                    tips.BackColor = ColorTranslator.FromHtml("#C0392B"); // 暗红
-                    tips.ForeColor = Color.White;
-                    break;
-
-                default:
-                    // 默认使用中性色
-                    tips.BackColor = ColorTranslator.FromHtml("#7F8C8D"); // 灰色
-                    tips.ForeColor = Color.White;
-                    break;
-            }
-
-            tips.ImageIndex = (int)Type;
-			    tips.label1.Text = msg;
-				tips.TopMost = true;
-            if (waittime > 0) { 
-                lock (useing_Tips)
-                { 
-                    useing_Tips.Add(tips);
-                }
-            }
-			tips.StartPosition = FormStartPosition.Manual;
-			if (inWindow)
+			get => _ImageIndex;
+			set
 			{
-				tips.Location = new Point(BaseForm.Location.X+ (BaseForm.Width /2 - tips.Width /2), BaseForm.Location.Y + (BaseForm.Height - tips.Height - (int)(BaseForm.Height *0.25) ));
+				_ImageIndex = value;
+				if (!IsDisposed)
+					Invalidate();
 			}
-			else
-			{
-				tips.Location = new Point(Screen.PrimaryScreen.Bounds.Location.X + (Screen.PrimaryScreen.Bounds.Width / 2 - tips.Width / 2), Screen.PrimaryScreen.Bounds.Location.Y + (Screen.PrimaryScreen.Bounds.Height - tips.Height - 220));
-
-			}
-			int n = tips.GetTextLineCount(tips.label1);
-			tips.Height = tips.Height * n;
-			tips.ShowForm(waittime);
-            return tips;
-
-        }
-   
-        public int GetTextLineCount(System.Windows.Forms.Label label1)
-	{
-		using (Graphics graphics = label1.CreateGraphics())
-		{
-			SizeF textSize = graphics.MeasureString(label1.Text, label1.Font);
-			int lineCount = (int)Math.Ceiling(textSize.Width / label1.Width);
-
-			return lineCount;
 		}
-	}
-	System.Windows.Forms.Timer close_t = new System.Windows.Forms.Timer();
 
-        /*  private void ShowForm(int waittime = 2000)
-          {
-              // 确保从主线程访问
-              if (this.InvokeRequired)
-              {
-                  this.Invoke(new Action<int>(ShowForm), waittime);  // 调用主线程上的方法
-                  return;
-              }
+		private const int MaxCount = 4;
+		private const int Margin = 10;
+		private const int DuplicateInterval = 300;
 
-              Show();
-              Rectangle rect = this.ClientRectangle;
-              using (GraphicsPath pa = new GraphicsPath())
-              {
+		private sealed class ToastContext
+		{
+			public int UiThreadId;
+			public Form HostForm;
+			public List<MyTips> ActiveTips = new List<MyTips>();
+			public Dictionary<string, DateTime> RecentTips = new Dictionary<string, DateTime>();
+		}
 
-              ;
+		private static readonly object syncRoot = new object();
+		private static readonly Dictionary<int, ToastContext> contexts = new Dictionary<int, ToastContext>();
+		private static Form _defaultHostForm;
 
-              // 开始绘制圆角矩形  
-              // 注意：为了简化，我们假设矩形的宽度和高度都足够大，可以放下圆角  
+		private int _ownerThreadId = -1;
 
-              // 左上角  
-              pa.AddArc(rect.Left, rect.Top, 2 * radius, 2 * radius, 180, 90);
+		#region 对外 API
 
-              // 右上角  
-              pa.AddArc(rect.Right - 2 * radius, rect.Top, 2 * radius, 2 * radius, 270, 90);
+		public static void SetDefaultHost(Form form)
+		{
+			if (form == null || form.IsDisposed) return;
 
-              // 右下角 
-              pa.AddArc(rect.Right - 2 * radius, rect.Bottom - 2 * radius, 2 * radius, 2 * radius, 0, 90);
+			lock (syncRoot)
+			{
+				_defaultHostForm = form;
+			}
 
-              // 左下角 
-              pa.AddArc(rect.Left, rect.Bottom - 2 * radius, 2 * radius, 2 * radius, 90, 90);
-                  Region oldRegion = this.Region;
-                  this.Region = new Region(pa);
-                  oldRegion?.Dispose();  // 避免泄漏旧的 Region
-                                         //   this.Region = new Region(pa);
-                  Task.Factory.StartNew(() => { 
-                 Thread.Sleep(waittime);
-                 CloseWindow(null,null);
-              });
-              }
-            *//*  close_t.Interval = waittime;
-              close_t.Tick += CloseWindow;
-              close_t.Enabled = true;*//*
-          }*/
+			RegisterThreadHost(form);
+		}
 
-        private void ShowForm(int waittime = 2000)
-        {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action<int>(ShowForm), waittime);
-                return;
-            }
+		public static void SetThreadHost(Form form)
+		{
+			if (form == null || form.IsDisposed) return;
+			RegisterThreadHost(form);
+		}
 
-            try
-            {
-                Show();
-                Region oldRegion = this.Region;
+		public static MyTips ShowSuccess(string msg, int duration = 2000)
+			=> Show(null, Tipstype.Success, msg, duration);
 
-                using (GraphicsPath pa = new GraphicsPath())
-                {
-                    Rectangle rect = this.ClientRectangle;
-                    float r = radius;
-                    pa.AddArc(rect.Left, rect.Top, 2 * r, 2 * r, 180, 90);
-                    pa.AddArc(rect.Right - 2 * r, rect.Top, 2 * r, 2 * r, 270, 90);
-                    pa.AddArc(rect.Right - 2 * r, rect.Bottom - 2 * r, 2 * r, 2 * r, 0, 90);
-                    pa.AddArc(rect.Left, rect.Bottom - 2 * r, 2 * r, 2 * r, 90, 90);
-                    pa.CloseFigure(); // 确保路径闭合
+		public static MyTips ShowInfo(string msg, int duration = 2000)
+			=> Show(null, Tipstype.Tip, msg, duration);
 
-                    this.Region = new Region(pa);
-                }
+		public static MyTips ShowWarn(string msg, int duration = 2000)
+			=> Show(null, Tipstype.Warn, msg, duration);
 
-                oldRegion?.Dispose();
-                if (waittime > 0)
-					Task.Delay(waittime).ContinueWith(_ =>
+		public static MyTips ShowError(string msg, int duration = 2000)
+			=> Show(null, Tipstype.Error, msg, duration);
+
+		public static MyTips ShowSuccess(Form owner, string msg, int duration = 2000)
+			=> Show(owner, Tipstype.Success, msg, duration);
+
+		public static MyTips ShowInfo(Form owner, string msg, int duration = 2000)
+			=> Show(owner, Tipstype.Tip, msg, duration);
+
+		public static MyTips ShowWarn(Form owner, string msg, int duration = 2000)
+			=> Show(owner, Tipstype.Warn, msg, duration);
+
+		public static MyTips ShowError(Form owner, string msg, int duration = 2000)
+			=> Show(owner, Tipstype.Error, msg, duration);
+
+		// 兼容旧接口
+		public static MyTips ShowTipSuccess(string msg, int wait = 2000)
+			=> ShowSuccess(msg, wait);
+
+		public static MyTips ShowTipTip(string msg, int wait = 2000)
+			=> ShowInfo(msg, wait);
+
+		public static MyTips ShowTipWarn(string msg, int wait = 2000)
+			=> ShowWarn(msg, wait);
+
+		public static MyTips ShowTipError(string msg, int wait = 2000)
+			=> ShowError(msg, wait);
+
+		// 新增：兼容旧命名 + 指定宿主
+		public static MyTips ShowTipSuccess(Form owner, string msg, int wait = 2000)
+			=> ShowSuccess(owner, msg, wait);
+
+		public static MyTips ShowTipTip(Form owner, string msg, int wait = 2000)
+			=> ShowInfo(owner, msg, wait);
+
+		public static MyTips ShowTipWarn(Form owner, string msg, int wait = 2000)
+			=> ShowWarn(owner, msg, wait);
+
+		public static MyTips ShowTipError(Form owner, string msg, int wait = 2000)
+			=> ShowError(owner, msg, wait);
+
+		public static new MyTips Show(Form baseForm, Tipstype type, string msg, int duration = 2000)
+		{
+			Form host = ResolveHostForm(baseForm);
+			if (host == null) return null;
+
+			if (host.InvokeRequired)
+			{
+				try
+				{
+					return (MyTips)host.Invoke(new Func<MyTips>(() => ShowCore(host, type, msg, duration)));
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine(ex);
+					return null;
+				}
+			}
+
+			return ShowCore(host, type, msg, duration);
+		}
+
+		#endregion
+
+		#region 宿主与上下文
+
+		private static void RegisterThreadHost(Form form)
+		{
+			if (form == null || form.IsDisposed) return;
+
+			if (!form.IsHandleCreated)
+			{
+				try
+				{
+					var _ = form.Handle;
+				}
+				catch
+				{
+					return;
+				}
+			}
+
+			int threadId = GetFormThreadId(form);
+
+			lock (syncRoot)
+			{
+				if (!contexts.TryGetValue(threadId, out var ctx))
+				{
+					ctx = new ToastContext
 					{
-						try
-						{
-							if (this.IsHandleCreated)
-							{
-								this.BeginInvoke(new Action(() =>
-								{
-									if (!this.IsDisposed)
-										this.Close();
-								}));
-							}
-						}
-						catch (ObjectDisposedException)
-						{
-							// 窗体已经释放，忽略即可
-						}
-					});
+						UiThreadId = threadId,
+						HostForm = form
+					};
+					contexts[threadId] = ctx;
+				}
+				else
+				{
+					ctx.HostForm = form;
+				}
+			}
 
+			form.FormClosed -= HostForm_FormClosed;
+			form.FormClosed += HostForm_FormClosed;
+		}
+
+		private static void HostForm_FormClosed(object sender, FormClosedEventArgs e)
+		{
+			var form = sender as Form;
+			if (form == null) return;
+
+			int threadId = GetFormThreadId(form);
+
+			lock (syncRoot)
+			{
+				if (contexts.TryGetValue(threadId, out var ctx) && ReferenceEquals(ctx.HostForm, form))
+				{
+					ctx.HostForm = null;
+				}
+
+				if (_defaultHostForm == form)
+				{
+					_defaultHostForm = null;
+				}
+			}
+		}
+
+		private static Form ResolveHostForm(Form inputForm)
+		{
+			if (IsValidHost(inputForm))
+			{
+				RegisterThreadHost(inputForm);
+				return inputForm;
+			}
+
+			int currentThreadId = Thread.CurrentThread.ManagedThreadId;
+
+			lock (syncRoot)
+			{
+				if (contexts.TryGetValue(currentThreadId, out var ctx) && IsValidHost(ctx.HostForm))
+					return ctx.HostForm;
+
+				if (IsValidHost(_defaultHostForm))
+					return _defaultHostForm;
+			}
+
+			var openForm = Application.OpenForms
+				.Cast<Form>()
+				.FirstOrDefault(IsValidHost);
+
+			if (openForm != null)
+			{
+				RegisterThreadHost(openForm);
+				return openForm;
+			}
+
+			return null;
+		}
+
+		private static bool IsValidHost(Form form)
+		{
+			return form != null && !form.IsDisposed && form.IsHandleCreated;
+		}
+
+		private static int GetFormThreadId(Form form)
+		{
+			if (form == null) return -1;
+			return form.InvokeRequired
+				? GetWindowThreadId(form.Handle)
+				: Thread.CurrentThread.ManagedThreadId;
+		}
+
+		[System.Runtime.InteropServices.DllImport("user32.dll")]
+		private static extern int GetWindowThreadProcessId(IntPtr hWnd, out int processId);
+
+		private static int GetWindowThreadId(IntPtr handle)
+		{
+			GetWindowThreadProcessId(handle, out _);
+			return GetWindowThreadProcessId(handle, out _);
+		}
+
+		private static ToastContext GetContextByThreadId(int threadId)
+		{
+			lock (syncRoot)
+			{
+				contexts.TryGetValue(threadId, out var ctx);
+				return ctx;
+			}
+		}
+
+		#endregion
+
+		#region 核心逻辑
+
+		private static MyTips ShowCore(Form host, Tipstype type, string msg, int duration)
+		{
+			if (host == null || host.IsDisposed) return null;
+
+			int threadId = GetFormThreadId(host);
+
+			ToastContext ctx;
+			lock (syncRoot)
+			{
+				if (!contexts.TryGetValue(threadId, out ctx))
+				{
+					ctx = new ToastContext
+					{
+						UiThreadId = threadId,
+						HostForm = host
+					};
+					contexts[threadId] = ctx;
+				}
+				else
+				{
+					ctx.HostForm = host;
+				}
+			}
+
+			lock (ctx)
+			{
+				string key = $"{type}_{msg}";
+				DateTime now = DateTime.Now;
+
+				var expiredKeys = ctx.RecentTips
+					.Where(kv => (now - kv.Value).TotalMilliseconds > DuplicateInterval)
+					.Select(kv => kv.Key)
+					.ToList();
+
+				foreach (var k in expiredKeys)
+					ctx.RecentTips.Remove(k);
+
+				if (ctx.RecentTips.ContainsKey(key))
+					return null;
+
+				ctx.RecentTips[key] = now;
+
+				var alive = ctx.ActiveTips.Where(t => t != null && !t.IsDisposed).ToList();
+
+				while (alive.Count >= MaxCount)
+				{
+					try
+					{
+						var old = alive[0];
+						if (old != null && !old.IsDisposed)
+							old.Close();
+					}
+					catch (Exception ex)
+					{
+						System.Diagnostics.Debug.WriteLine(ex);
+					}
+					alive.RemoveAt(0);
+				}
+
+				ctx.ActiveTips = ctx.ActiveTips.Where(t => t != null && !t.IsDisposed).ToList();
+
+				MyTips tip = new MyTips();
+				tip._ownerThreadId = threadId;
+				tip.panel3.BackgroundImageLayout = ImageLayout.Zoom;
+
+				switch (type)
+				{
+					case Tipstype.Success:
+						tip.BackColor = ColorTranslator.FromHtml("#27AE60");
+						tip.panel3.BackgroundImage = tip.imageList1.Images[0];
+						break;
+					case Tipstype.Warn:
+						tip.BackColor = ColorTranslator.FromHtml("#D68910");
+						tip.panel3.BackgroundImage = tip.imageList1.Images[1];
+						break;
+					case Tipstype.Tip:
+						tip.BackColor = ColorTranslator.FromHtml("#2980B9");
+						tip.panel3.BackgroundImage = tip.imageList1.Images[2];
+						break;
+					case Tipstype.Error:
+						tip.BackColor = ColorTranslator.FromHtml("#C0392B");
+						tip.panel3.BackgroundImage = tip.imageList1.Images[3];
+						break;
+				}
+
+				tip.ForeColor = Color.White;
+				tip.ImageIndex = (int)type;
+				tip.label1.Text = msg ?? "";
+				tip.StartPosition = FormStartPosition.Manual;
+				tip.TopMost = true;
+
+				int baseHeight = tip.Height;
+				int line = Math.Max(1, tip.GetTextLineCount(tip.label1));
+
+				if (line == 1)
+					tip.Height = (int)(baseHeight * 0.7f);
+				else
+					tip.Height = (int)(baseHeight * (0.7f + (line - 1) * 0.9f));
+
+				Rectangle area = Screen.FromControl(host).WorkingArea;
+
+				int totalOffsetY = 0;
+				foreach (var t in ctx.ActiveTips.Where(t => t != null && !t.IsDisposed))
+				{
+					totalOffsetY += t.Height + Margin;
+				}
+
+				int centerX = area.Left + (area.Width - tip.Width) / 2;
+				int centerY = area.Top + (area.Height - tip.Height) / 2;
+				tip.Location = new Point(centerX, centerY + totalOffsetY);
+
+				ctx.ActiveTips.Add(tip);
+				tip.ShowToast(duration);
+
+				return tip;
+			}
+		}
+
+		#endregion
+
+		#region 动画
+
+		private async void ShowToast(int duration)
+		{
+			if (IsDisposed) return;
+
+			if (InvokeRequired)
+			{
+				try
+				{
+					Invoke(new Action<int>(ShowToast), duration);
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine(ex);
+				}
+				return;
+			}
+
+			try
+			{
+				Opacity = 0;
+
+				if (!Visible)
+					base.Show();
+
+				ApplyRound();
+
+				for (double i = 0; i <= 1; i += 0.1)
+				{
+					await Task.Delay(15);
+					if (IsDisposed) return;
+					Opacity = i;
+				}
+
+				if (duration > 0)
+					await Task.Delay(duration);
+
+				if (duration == -1)
+					return;
+
+				for (double i = 1; i >= 0; i -= 0.1)
+				{
+					await Task.Delay(15);
+					if (IsDisposed) return;
+					Opacity = i;
+				}
+
+				if (!IsDisposed)
+					Close();
 			}
 			catch (Exception ex)
-            {
-                Console.WriteLine("ShowForm异常：" + ex.Message);
-            }
-        }
-
-        private void MyTips_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            lock (useing_Tips)
-            {
-                useing_Tips.Remove(this);
-            }
-            this.Dispose();
-            GC.Collect();
-        }
-        private void CloseWindow(object sender, EventArgs e)
-		{
-            //close_t.Enabled = false;
-            if (Disposing)
-            {
-                return;
-            }
-            if (InvokeRequired)
-            {
-                Invoke(CloseWindow,null,null);
-                return;
-            }
-            this.Close();
+			{
+				System.Diagnostics.Debug.WriteLine(ex);
+			}
 		}
 
-        /* private void panel3_Paint(object sender, PaintEventArgs e)
-         {
-             // 获取图像列表中的图像
-             Image image = imageList1.Images[ImageIndex]; // 根据需要选择图像索引
+		private void ApplyRound()
+		{
+			Rectangle rect = ClientRectangle;
+			using (GraphicsPath path = new GraphicsPath())
+			{
+				float r = radius;
+				float d = 2 * r;
 
-             // 获取 Panel 的大小
-             int panelWidth = panel3.Width;
-             int panelHeight = panel3.Height;
-             // 计算正方形的高度（宽度是高度的三分之二）
-             int squareHeight = 35;
+				path.AddArc(rect.Left, rect.Top, d, d, 180, 90);
+				path.AddArc(rect.Right - d, rect.Top, d, d, 270, 90);
+				path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+				path.AddArc(rect.Left, rect.Bottom - d, d, d, 90, 90);
+				path.CloseFigure();
 
-             // 计算正方形的左上角坐标，使其居中
-             int x = (panelWidth - squareHeight) / 2;
-             int y = (panelHeight - squareHeight) / 2;
-             var g = e.Graphics;
-             // 计算目标矩形的大小和位置
-             Rectangle destRect = new Rectangle(x,y, squareHeight, squareHeight);
+				Region?.Dispose();
+				Region = new Region(path);
+			}
+		}
 
-             // 设置抗锯齿模式
+		#endregion
 
-             // 绘制图像，缩放以适应 Panel 的大小
-             e.Graphics.DrawImage(image, destRect);
-         }*/
-        private void panel3_Paint(object sender, PaintEventArgs e)
-        {
-            if (imageList1 == null || ImageIndex < 0 || ImageIndex >= imageList1.Images.Count)
-                return;
+		#region 关闭重排
 
-            try
-            {
-                using (Image image = (Image)imageList1.Images[ImageIndex].Clone()) // clone 避免原图句柄问题
-                {
-                    int panelWidth = panel3.Width;
-                    int panelHeight = panel3.Height;
-                    int squareHeight = 35;
+		private void MyTips_FormClosed(object sender, FormClosedEventArgs e)
+		{
+			var ctx = GetContextByThreadId(_ownerThreadId);
+			if (ctx == null) return;
 
-                    int x = (panelWidth - squareHeight) / 2;
-                    int y = (panelHeight - squareHeight) / 2;
-                    Rectangle destRect = new Rectangle(x, y, squareHeight, squareHeight);
+			lock (ctx)
+			{
+				ctx.ActiveTips.Remove(this);
 
-                    e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    e.Graphics.DrawImage(image, destRect);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("图像绘制失败: " + ex.Message);
-                // 可以考虑记录日志
-            }
-        }
+				Form host = ctx.HostForm;
+				Rectangle area = host != null && !host.IsDisposed
+					? Screen.FromControl(host).WorkingArea
+					: Screen.PrimaryScreen.WorkingArea;
 
-        private void MyTips_FormClosed_1(object sender, FormClosedEventArgs e)
-        {
+				int offsetY = 0;
 
-            imageList1?.Dispose();
+				foreach (var tip in ctx.ActiveTips.Where(t => t != null && !t.IsDisposed))
+				{
+					int centerX = area.Left + (area.Width - tip.Width) / 2;
+					int centerY = area.Top + (area.Height - tip.Height) / 2;
 
-        }
-    }
+					tip.Location = new Point(centerX, centerY + offsetY);
+					offsetY += tip.Height + Margin;
+				}
+			}
+		}
 
+		#endregion
+
+		#region 文本行数
+
+		public int GetTextLineCount(Label label)
+		{
+			using (Graphics g = label.CreateGraphics())
+			{
+				SizeF size = g.MeasureString(label.Text, label.Font, label.Width);
+				return Math.Max(1, (int)Math.Ceiling(size.Height / label.Font.Height));
+			}
+		}
+
+		#endregion
+	}
 }
